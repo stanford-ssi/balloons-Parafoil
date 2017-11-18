@@ -27,8 +27,15 @@
 File dataFile;
 long lastFlush;
 
+//Timing
+long loopTime;
+
 //BMP280
 Adafruit_BMP280 bmp;
+double temp;
+double pressure;
+double alt;
+
 long lastAscentTime;
 double lastAlt;
 double ascentRate;
@@ -71,34 +78,44 @@ void setup() {
   lastAlt = bmp.readAltitude(LAUNCH_SITE_PRESSURE);
   ascentRate = 0;
   lastAscentTime = millis();
-
-  dataFile.print("Time(ms), Pressure(Pa), Alt(m), AscentRate(m/s), TempIn(C), OrientationX(deg), y(deg) , z(deg), ");
-  dataFile.println("TempOut(C), GPSLat, GPSLong, GPSAge, GPSSats, RBSigalQuality");
+  dataFile= SD.open("datalog.txt", FILE_WRITE);
+  dataFile.println("Time(ms), Pressure(Pa), Alt(m), AscentRate(m/s), TempIn(C), GPSLat, GPSLong, GPSSats");
 
 }
 
 void loop() {
-  dataFile= SD.open("datalog.txt", FILE_WRITE);
- 
   String dataString = readSensors();
   DEBUG_PRINTLN(dataString);
-  dataFile.println(dataString);
-  dataFile.close();
- // flashLED();
+  dataFile.print(pressure);
+  dataFile.print(',');
+  dataFile.print(alt);
+  dataFile.print(',');
+  dataFile.print(ascentRate);
+  dataFile.print(',');
+  dataFile.print(temp);
+  dataFile.print(',');
+  dataFile.print(f_lat);
+  dataFile.print(',');
+  dataFile.print(f_long);
+  dataFile.print(',');
+  dataFile.print(sats);
+  dataFile.print('\n');
+  dataFile.flush();
+
 }
 
 String readSensors() {
   String dataString = "";
 
   //Timing
-  long loopTime = millis();
+  loopTime = millis();
   DEBUG_PRINTLN("Loop time ");
   DEBUG_PRINTLN(loopTime);
   dataString += "Loop Time: " + String(loopTime)+ ", ";
 
-  double temp = bmp.readTemperature();
-  double pressure = bmp.readPressure();
-  double alt = bmp.readAltitude(LAUNCH_SITE_PRESSURE);
+  temp = bmp.readTemperature();
+  pressure = bmp.readPressure();
+  alt = bmp.readAltitude(LAUNCH_SITE_PRESSURE);
   
   if (loopTime - lastAscentTime > BAROMETER_MEASURMENT_INTERVAL) { // calculate ascent rate in m/s every 10s
     ascentRate = (alt - lastAlt) * 1000 / (loopTime - lastAscentTime);
@@ -128,7 +145,7 @@ String readSensors() {
 
   DEBUG_PRINTLN("LATITUDE: " + String(f_lat));
   DEBUG_PRINT("LONGITUDE: " + String(f_long));
-  Serial.println(f_long,4);
+  
   DEBUG_PRINTLN("AGE: " + String(f_age));
   DEBUG_PRINTLN("NUMBER OF SATELLITES: " + String(sats));
   
