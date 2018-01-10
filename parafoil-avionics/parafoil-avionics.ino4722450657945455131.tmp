@@ -83,8 +83,9 @@ void setup() {
 }
 
 void loop() {
-  String dataString = readSensors();
-  DEBUG_PRINTLN(dataString);
+  //String dataString = readSensors();
+  Serial.println(bmp.readTemperature());
+ // DEBUG_PRINTLN(dataString);
   dataFile.print(loopTime);
   dataFile.print(',');
   dataFile.print(pressure);
