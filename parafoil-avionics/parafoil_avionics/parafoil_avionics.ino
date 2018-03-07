@@ -8,6 +8,16 @@
  * 
  */
 
+ #include <Encoder.h>
+
+// Change these two numbers to the pins connected to your encoder.
+//   Best Performance: both pins have interrupt capability
+//   Good Performance: only the first pin has interrupt capability
+//   Low Performance:  neither pin has interrupt capability
+
+Encoder myEnc(5, 6);
+//   avoid using pins with LEDs attached
+
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BMP280.h>
 #include <Adafruit_BNO055.h>
@@ -112,21 +122,28 @@ volatile int nAILERONIn = NEUTRAL_AILERON;
 volatile unsigned long ulStartPeriod = 0; 
 volatile boolean bNewAILERONSignal = false; 
 
+
+
 void setup() {
   startTime = millis();
   lastFlush = 0;
   lastTransmit = 0;
+  pinMode(22,OUTPUT);
+pinMode(21,OUTPUT);
+digitalWrite(22,HIGH);
+digitalWrite(21,LOW);
+
 
   pinMode(LED_PIN, OUTPUT); //Flashes LED when SD, BMP, or BNO not intialized
   digitalWrite(LED_PIN, LOW);
   
-#ifdef DEBUG
-  Serial.begin(9600);
-  for (int i = 0; i < SERIAL_TIMEOUT && !Serial; i++) {
-    continue;
-    delay(1000);
-  }
-#endif
+//#ifdef DEBUG
+//  Serial.begin(9600);
+//  for (int i = 0; i < SERIAL_TIMEOUT && !Serial; i++) {
+//    continue;
+//    delay(1000);
+//  }
+//#endif
 
   // SD Card Reader
   SPI.setSCK(SCK_PIN);
@@ -134,7 +151,7 @@ void setup() {
   DEBUG_PRINTLN("Initializing SD card...");
   if (!SD.begin(SD_READER_CS)) {
     DEBUG_PRINTLN("Card failed, or not present");
-    flashLED(); // BLOCKS CODE
+   // flashLED(); // BLOCKS CODE
   } else {
     dataFile = SD.open("datalog.txt", FILE_WRITE);
     DEBUG_PRINTLN("Card initialized.");
@@ -143,7 +160,7 @@ void setup() {
   // BMP280
   if (!bmp.begin()) {
     DEBUG_PRINTLN("Could not find a valid BMP280 sensor, check wiring!");
-    flashLED(); //WILL STOP CODE IF BMP NOT DETECTED
+    //flashLED(); //WILL STOP CODE IF BMP NOT DETECTED
   }
   lastAlt = bmp.readAltitude(LAUNCH_SITE_PRESSURE); // initialize ascent rate variables
   ascentRate = 0;
@@ -152,7 +169,7 @@ void setup() {
   // BNO055
   if (!bno.begin()) {
     DEBUG_PRINTLN("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-    flashLED();  //WILL STOP CODE IF BNO NOT DETECTED
+    //flashLED();  //WILL STOP CODE IF BNO NOT DETECTED
   }
   bno.setExtCrystalUse(true); // TODO figure this out
 
@@ -168,23 +185,58 @@ void setup() {
   }
 
   // RockBlock
-  IridiumSerial.begin(19200);
-  DEBUG_PRINTLN("Starting rockblock serial");
-  int err = modem.begin();
-  int signalQuality = -1;
-  DEBUG_PRINTLN(modem.getSignalQuality(signalQuality));
-  if (err != ISBD_SUCCESS) {
-    DEBUG_PRINT("Begin failed: error ");
-    DEBUG_PRINTLN(err);
-    if (err == ISBD_NO_MODEM_DETECTED) DEBUG_PRINTLN("No modem detected: check wiring.");
-    //flashLED();
-  }
+  //IridiumSerial.begin(19200);
+//  DEBUG_PRINTLN("Starting rockblock serial");
+//  int err = modem.begin();
+//  int signalQuality = -1;
+//  DEBUG_PRINTLN(modem.getSignalQuality(signalQuality));
+//  if (err != ISBD_SUCCESS) {
+//    DEBUG_PRINT("Begin failed: error ");
+//    DEBUG_PRINTLN(err);
+//    if (err == ISBD_NO_MODEM_DETECTED) DEBUG_PRINTLN("No modem detected: check wiring.");
+//    //flashLED();
+//  }
 
   attachInterrupt(AILERON_SIGNAL_IN,calcInput,CHANGE);
 }
 
 void loop() {
+  
   long loopTime = millis();
+  readSensors();
+  
+   // if a new AILERON signal has been measured, lets print the value to serial, if not our code could carry on with some other processing
+ if(bNewAILERONSignal)
+ {
+
+   Serial.println(nAILERONIn); 
+
+   // set this back to false when we have finished
+   // with nAILERONIn, while true, calcInput will not update
+   // nAILERONIn
+   bNewAILERONSignal = false;
+ }
+
+ Serial.print("AILERON PWM: ");
+  Serial.println(nAILERONIn); 
+
+  nAILERONIn = map(nAILERONIn, 1000, 2000, 0, 255);
+  Serial.print("New Aileron: ");
+  Serial.println(nAILERONIn);
+
+  analogWrite(29, nAILERONIn);
+  
+
+  
+
+  
+
+
+
+
+
+  
+ // other processing ...
 
 //  if(firstSend) {
 //    firstSend = false;
@@ -194,20 +246,21 @@ void loop() {
 //    lastTransmit = loopTime;
 //  }
   
-  // Receive RockBlock Command as two bytes: command (char), and data (byte)
-  uint8_t buffer[2];
-  size_t bufferSize = sizeof(buffer);
-  DEBUG_PRINTLN("Receiving RockBlock Commands.");
-  modem.sendReceiveSBDText(NULL, buffer, bufferSize);
-  DEBUG_PRINTLN("Turns it it doesn't block.");
+//   Receive RockBlock Command as two bytes: command (char), and data (byte)
+//  uint8_t buffer[2];
+//  size_t bufferSize = sizeof(buffer);
+//  DEBUG_PRINTLN("Receiving RockBlock Commands.");
+//  modem.sendReceiveSBDText(NULL, buffer, bufferSize);
+//  DEBUG_PRINTLN("Turns it it doesn't block.");
+//
+//  if (loopTime - lastTransmit > ROCKBLOCK_TRANSMIT_TIME) {
+//    DEBUG_PRINTLN("Transmiting to ROCKBlock");
+//    char buf [200];
+//    dataStringBuffer.toCharArray(buf, sizeof(buf));
+//    modem.sendSBDText(buf);
+//    lastTransmit = loopTime;
+//  }
 
-  if (loopTime - lastTransmit > ROCKBLOCK_TRANSMIT_TIME) {
-    DEBUG_PRINTLN("Transmiting to ROCKBlock");
-    char buf [200];
-    dataStringBuffer.toCharArray(buf, sizeof(buf));
-    modem.sendSBDText(buf);
-    lastTransmit = loopTime;
-  }
 }
 
 // Reads from all of the sensors and outputs the data string
@@ -296,30 +349,12 @@ String readSensors() {
 
 
 
-   //PWM signals from receiver
-   // if a new AILERON signal has been measured, lets print the value to serial, if not our code could carry on with some other processing
- if(bNewAILERONSignal)
- {
-  
-   Serial.println(nAILERONIn); 
-
-   // set this back to false when we have finished
-   // with nAILERONIn, while true, calcInput will not update
-   // nAILERONIn
-   
-   bNewAILERONSignal = false;
- }
- 
- Serial.print("AILERON PWM: ");
- Serial.println(nAILERONIn); 
- // other processing ...
-
 
   return dataString;     
 }
 
 void flashLED() {
-  while (true) {
+  while (false) {
     digitalWrite(LED_PIN, HIGH);
     delay(500);
     digitalWrite(LED_PIN, LOW);
@@ -327,26 +362,26 @@ void flashLED() {
   }
 }
 
-bool ISBDCallback() {
-  String dataString = readSensors();
-  long loopTime = millis();
-
-  if (dataFile) {
-    DEBUG_PRINTLN("Writing to datalog.txt");
-    dataFile.println(dataString);
-  } else {
-      DEBUG_PRINTLN("Error opening datalog.txt");
-  }
-
-  if (loopTime - lastFlush > SD_CARD_FLUSH_TIME) {
-    DEBUG_PRINTLN("Flushing datalog.txt");
-    dataFile.flush();
-    lastFlush = loopTime;
-  }  
-  
-  delay(50);
-  return true;
-}
+//bool ISBDCallback() {
+//  String dataString = readSensors();
+//  long loopTime = millis();
+//
+//  if (dataFile) {
+//    DEBUG_PRINTLN("Writing to datalog.txt");
+//    dataFile.println(dataString);
+//  } else {
+//      DEBUG_PRINTLN("Error opening datalog.txt");
+//  }
+//
+//  if (loopTime - lastFlush > SD_CARD_FLUSH_TIME) {
+//    DEBUG_PRINTLN("Flushing datalog.txt");
+//    dataFile.flush();
+//    lastFlush = loopTime;
+//  }  
+//  
+//  delay(50);
+//  return true;
+//}
 
 
 void calcInput()
