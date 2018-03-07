@@ -1,20 +1,28 @@
 /*
  * Avionics for parafoil.
  * 
- * This code logs data from sensors
+ * This code logs data from sensors, reads PWM values from the RC receiver, and 
+ * sends a PWM signal to control speed and direction of the motors
  * 
- * Jason Kurohara and Eric Martin
+ * Jason Kurohara and Eric Martin 
  * 
  */
+
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BMP280.h>
- #include <Adafruit_BNO055.h>
+#include <Adafruit_BNO055.h>
 #include <Adafruit_MAX31855.h>
 #include <IridiumSBD.h>
 #include <TinyGPS++.h>
 #include <SD.h>
 #include <SPI.h>
 #include <Wire.h>
+
+/* 
+ * Preprocessor directive to debug code using print statements
+ * LED_PIN is a flashes if avionics components are not initialized
+ * 
+ */
 
 #define DEBUG // comment out to turn off debugging
 #ifdef DEBUG
@@ -25,22 +33,31 @@
 #define DEBUG_PRINTLN(x)
 #endif
 
+#define LED_PIN 22
+
+
 bool firstSend = true;
 String dataStringBuffer = "";
 
-// Timing (Internal)
-long startTime;
-#define SD_CARD_FLUSH_TIME 10000 // 10 Seconds
-#define ROCKBLOCK_TRANSMIT_TIME 300000 // 5 Minutes
-#define BAROMETER_MEASURMENT_INTERVAL 10000 // 10 Seconds
 
-// SPI Ports
+/*
+ * TIMING (INTERNAL)
+ * This initializes timing variables used to monitor SD card flush time, RB transmission time, 
+ * and barometer measurement interval
+ */
+long startTime;
+#define SD_CARD_FLUSH_TIME 10000 // Flushes SD card every 10 Seconds
+#define ROCKBLOCK_TRANSMIT_TIME 300000 // Transmits to RB every 5 minutes
+#define BAROMETER_MEASURMENT_INTERVAL 10000 // 10 Seconds
+#define SERIAL_TIMEOUT 60000 //Serial timeout
+
+/*
+ * SPI BUS
+ * This defines constants for the SPI line.  The thermocouple and SD card are on the SPI line
+ */
 #define SCK_PIN 14
 #define SD_READER_CS 20
 #define THERMOCOUPLE_CS 21
-
-// Environemental Parameters
-#define LAUNCH_SITE_PRESSURE 1014.562
 
 // SD Card Reader (SPI)
 File dataFile;
@@ -48,6 +65,9 @@ long lastFlush;
 
 // Thermocouple (SPI) | Exterior Temperature
 Adafruit_MAX31855 thermocouple(13, THERMOCOUPLE_CS, 12);
+
+// Environemental Parameters
+#define LAUNCH_SITE_PRESSURE 1014.562
 
 // BMP280 (I2C) | Pressure, Internal Temperature
 Adafruit_BMP280 bmp;
@@ -66,41 +86,45 @@ IridiumSBD modem(IridiumSerial);
 // GPS (Hardware Serial) GPS
 TinyGPSPlus gps;
 float f_lat = 0, f_long = 0;
+
 int sats = -1;
 long unsigned f_age = 0;
 
-// FET pin assignments
-const int WIRE_TOP = 23;
-const int WIRE_BOTTOM = 22;
-const int heater = 2;
-bool applyHeat = false;
-
 bool hasSD = false;
 
-//Time(seconds) for nichrome to cut through
-const int delayTime = 10;
+/*
+ * These constants are used for the ISR to read pulses from the RC receiver.
+ * When state of the line changes from LOW to HIGH or HIGH to LOW, the ISR is triggered 
+ * and the PWM values are red
+ */
+#define AILERON_SIGNAL_IN 2 // INTERRUPT 2 = DIGITAL PIN 2 - use the interrupt number in attachInterrupt
+#define AILERON_SIGNAL_IN_PIN 2 // INTERRUPT 0 = DIGITAL PIN 2 - use the PIN number in digitalRead
 
-#define LED_PIN 13
+#define NEUTRAL_AILERON 1500 // this is the duration in microseconds of neutral AILERON on an electric RC Car
+
+/*
+ * Interrupt Service Routine (ISR) CONSTANTS
+ * nAileron: Volatile, we set this in the interrupt and read it in the loop, therefore it must be declared volatile.
+ * ulStartPeriod: Set in the interrupt, start time of the PWM signal
+ * bNewAILERONSignal: Set in interrupt and read in loop. This indiciates when we have a new signal
+ */
+volatile int nAILERONIn = NEUTRAL_AILERON; 
+volatile unsigned long ulStartPeriod = 0; 
+volatile boolean bNewAILERONSignal = false; 
 
 void setup() {
   startTime = millis();
   lastFlush = 0;
   lastTransmit = 0;
 
-  // set FET gates to LOW
-  pinMode(WIRE_TOP, OUTPUT);
-  pinMode(WIRE_BOTTOM, OUTPUT);
-  pinMode(heater, OUTPUT);
-  //pinMode(LED_PIN, OUTPUT); TODO: There's no LED on Pin 13?
-  digitalWrite(WIRE_TOP, LOW);
-  digitalWrite(WIRE_BOTTOM, LOW);
-  digitalWrite(heater, LOW);
+  pinMode(LED_PIN, OUTPUT); //Flashes LED when SD, BMP, or BNO not intialized
   digitalWrite(LED_PIN, LOW);
-
+  
 #ifdef DEBUG
   Serial.begin(9600);
-  while (!Serial) {
+  for (int i = 0; i < SERIAL_TIMEOUT && !Serial; i++) {
     continue;
+    delay(1000);
   }
 #endif
 
@@ -110,7 +134,7 @@ void setup() {
   DEBUG_PRINTLN("Initializing SD card...");
   if (!SD.begin(SD_READER_CS)) {
     DEBUG_PRINTLN("Card failed, or not present");
-//    flashLED(); // TODO: uncomment
+    flashLED(); // BLOCKS CODE
   } else {
     dataFile = SD.open("datalog.txt", FILE_WRITE);
     DEBUG_PRINTLN("Card initialized.");
@@ -119,7 +143,7 @@ void setup() {
   // BMP280
   if (!bmp.begin()) {
     DEBUG_PRINTLN("Could not find a valid BMP280 sensor, check wiring!");
-    //flashLED();
+    flashLED(); //WILL STOP CODE IF BMP NOT DETECTED
   }
   lastAlt = bmp.readAltitude(LAUNCH_SITE_PRESSURE); // initialize ascent rate variables
   ascentRate = 0;
@@ -128,7 +152,7 @@ void setup() {
   // BNO055
   if (!bno.begin()) {
     DEBUG_PRINTLN("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-    //flashLED(); // TODO: uncomment
+    flashLED();  //WILL STOP CODE IF BNO NOT DETECTED
   }
   bno.setExtCrystalUse(true); // TODO figure this out
 
@@ -137,10 +161,10 @@ void setup() {
 
   pinMode(THERMOCOUPLE_CS, OUTPUT);
 
-  // Data column headers. Temporary.
+  // Data column headers. 
   if (dataFile) {
     dataFile.print("Time(ms), Pressure(Pa), Alt(m), AscentRate(m/s), TempIn(C), OrientationX(deg), y(deg) , z(deg), ");
-    dataFile.println("TempOut(C), GPSLat, GPSLong, GPSAge, GPSSats, RBSigalQuality");
+    dataFile.println("TempOut(C), GPSLat, GPSLong, GPSAge, GPSSats, RBSignalQuality");
   }
 
   // RockBlock
@@ -155,6 +179,8 @@ void setup() {
     if (err == ISBD_NO_MODEM_DETECTED) DEBUG_PRINTLN("No modem detected: check wiring.");
     //flashLED();
   }
+
+  attachInterrupt(AILERON_SIGNAL_IN,calcInput,CHANGE);
 }
 
 void loop() {
@@ -175,16 +201,6 @@ void loop() {
   modem.sendReceiveSBDText(NULL, buffer, bufferSize);
   DEBUG_PRINTLN("Turns it it doesn't block.");
 
-//  } else if (buffer[0] == 'p') { // camera pitch
-//    // TODO pass on second byte to arduino
-//    DEBUG_PRINT("Camera pitch command received. Value: ");
-//    DEBUG_PRINTLN(buffer[1]);
-//  } else if (buffer[0] == 'a') { // camera azimuth angle
-//    // TODO pass on second byte
-//    DEBUG_PRINT("Camera azimuth command received. Value: ");
-//    DEBUG_PRINTLN(buffer[1]);
-//  }
-
   if (loopTime - lastTransmit > ROCKBLOCK_TRANSMIT_TIME) {
     DEBUG_PRINTLN("Transmiting to ROCKBlock");
     char buf [200];
@@ -200,14 +216,13 @@ String readSensors() {
 
   // Timing
   long loopTime = millis();
-  DEBUG_PRINTLN("Loop Time ");
+  DEBUG_PRINT("Loop Time ");
   DEBUG_PRINTLN(loopTime);
   dataString += String(loopTime) + ", ";
 
   // BMP280 (Barometer + Thermometer) Input
-  DEBUG_PRINTLN("BMP280 stuff");
+  DEBUG_PRINTLN("BMP280 DATA");
   double tempIn = bmp.readTemperature();
-  applyHeat = (tempIn < 0);
   double pressure = bmp.readPressure();
   double alt = bmp.readAltitude(LAUNCH_SITE_PRESSURE); // avg sea level pressure for hollister for past month
   if (loopTime - lastAscentTime > BAROMETER_MEASURMENT_INTERVAL) { // calculate ascent rate in m/s every 10s
@@ -215,49 +230,61 @@ String readSensors() {
     lastAlt = alt;
     lastAscentTime = loopTime;
   }
+  
   dataString += String(pressure) + ", " + String(alt) + ", ";
   dataString += String(ascentRate) + ", " + String(tempIn) + ", ";
+
+  DEBUG_PRINT("Pressure: ");
   DEBUG_PRINTLN(pressure);
+  DEBUG_PRINT("Altitude: ");
   DEBUG_PRINTLN(alt);
+  DEBUG_PRINT("Ascent Rate: ");
   DEBUG_PRINTLN(ascentRate);
+  DEBUG_PRINT("Inside Temperature: ");
   DEBUG_PRINTLN(tempIn);
 
   // BNO055 (IMU) Input
-  DEBUG_PRINTLN("BNO055 Stuff");
+  DEBUG_PRINTLN("BNO055 Data");
   sensors_event_t event;
   bno.getEvent(&event);
   dataString += (String)event.orientation.x + ", " + (String)event.orientation.y + ", ";
   dataString += (String)event.orientation.z + ", ";
-  Serial.print("X-Direction: ");
+  DEBUG_PRINT("X-Direction: ");
   DEBUG_PRINTLN(event.orientation.x);
+  DEBUG_PRINT("Y-Direction: ");
   DEBUG_PRINTLN(event.orientation.y);
+  DEBUG_PRINT("Z-Direction: ");
   DEBUG_PRINTLN(event.orientation.z);
 
   // MAX31855 (Thermocouple) Input
   DEBUG_PRINTLN("MAX31855 Stuff");
   double temperature = thermocouple.readCelsius(); // celsius
   dataString += String(temperature) + ", ";
-  Serial.println(temperature);
-
+  DEBUG_PRINTLN(temperature);
+  
   // GPS Input
   DEBUG_PRINTLN("GPS Stuff");
-  
+
   while (Serial1.available()) {
     char c = Serial1.read();
-    if(gps.encode(c)) {
-      Serial.println("Printing the encoded data!");
+    if (gps.encode(c)) {
+      DEBUG_PRINTLN("Printing the encoded data!");
     }
   }
   f_lat = gps.location.lat();
   f_long = gps.location.lng();
-  f_age = gps.location.age();
+  float f_alt = gps.altitude.meters();
   sats = gps.satellites.value();
 
-  dataString += String(f_lat) + ", " + String(f_long) + ", ";
-  dataString += String(f_age) + ", " + String(sats) + ", ";
+  dataString += String(f_lat, 5) + ", " + String(f_long, 5) + ", ";
+  dataString += String(f_alt) + ", " + String(sats) + ", ";
+  DEBUG_PRINT("GPS Lat: ");
   DEBUG_PRINTLN(f_lat);
+  DEBUG_PRINT("GPS Long: ");
   DEBUG_PRINTLN(f_long);
-  DEBUG_PRINTLN(f_age);
+  DEBUG_PRINT("GPS Alt: ");
+  DEBUG_PRINTLN(f_alt);
+  DEBUG_PRINT("GPS Sats: ");
   DEBUG_PRINTLN(sats);
   DEBUG_PRINTLN("");
 
@@ -266,6 +293,28 @@ String readSensors() {
   dataString += String(signalQuality) + ", ";
 
   dataStringBuffer = dataString;
+
+
+
+   //PWM signals from receiver
+   // if a new AILERON signal has been measured, lets print the value to serial, if not our code could carry on with some other processing
+ if(bNewAILERONSignal)
+ {
+  
+   Serial.println(nAILERONIn); 
+
+   // set this back to false when we have finished
+   // with nAILERONIn, while true, calcInput will not update
+   // nAILERONIn
+   
+   bNewAILERONSignal = false;
+ }
+ 
+ Serial.print("AILERON PWM: ");
+ Serial.println(nAILERONIn); 
+ // other processing ...
+
+
   return dataString;     
 }
 
@@ -282,13 +331,6 @@ bool ISBDCallback() {
   String dataString = readSensors();
   long loopTime = millis();
 
-  // heat if too cold
-  if (applyHeat) {
-    digitalWrite(heater, HIGH);
-  } else {
-    digitalWrite(heater, LOW);
-  }
-
   if (dataFile) {
     DEBUG_PRINTLN("Writing to datalog.txt");
     dataFile.println(dataString);
@@ -304,5 +346,32 @@ bool ISBDCallback() {
   
   delay(50);
   return true;
+}
+
+
+void calcInput()
+{
+  // if the pin is high, its the start of an interrupt
+  if(digitalRead(AILERON_SIGNAL_IN_PIN) == HIGH)
+  {
+    // get the time using micros - when our code gets really busy this will become inaccurate, but for the current application its
+    // easy to understand and works very well
+    ulStartPeriod = micros();
+  }
+  else
+  {
+    // if the pin is low, its the falling edge of the pulse so now we can calculate the pulse duration by subtracting the
+    // start time ulStartPeriod from the current time returned by micros()
+    if(ulStartPeriod && (bNewAILERONSignal == false))
+    {
+      nAILERONIn = (int)(micros() - ulStartPeriod);
+      ulStartPeriod = 0;
+
+      // tell loop we have a new signal on the AILERON channel
+      // we will not update nAILERONIn until loop sets
+      // bNewAILERONSignal back to false
+      bNewAILERONSignal = true;
+    }
+  }
 }
 
