@@ -100,6 +100,14 @@ float f_lat = 0, f_long = 0;
 int sats = -1;
 long unsigned f_age = 0;
 
+#define HALL_SENSOR_1 22
+#define HALL_SENSOR_2 21
+#define HALL_SENSOR_3 //DEFINE 
+#define HALL_SENSOR_4 //DEFINE
+
+#define LOWER_BOUND_ENCODER -100
+#define UPPER_BOUND_ENCODER 100
+
 bool hasSD = false;
 
 /*
@@ -110,7 +118,9 @@ bool hasSD = false;
 #define AILERON_SIGNAL_IN 2 // INTERRUPT 2 = DIGITAL PIN 2 - use the interrupt number in attachInterrupt
 #define AILERON_SIGNAL_IN_PIN 2 // INTERRUPT 0 = DIGITAL PIN 2 - use the PIN number in digitalRead
 
-#define NEUTRAL_AILERON 1500 // this is the duration in microseconds of neutral AILERON on an electric RC Car
+#define NEUTRAL_AILERON 1500 // this is the duration middle PWM on the aileron stick
+#define LOWER_BOUND_AILERON 1000 
+#define UPPER_BOUND_AILERON 2000
 
 /*
  * Interrupt Service Routine (ISR) CONSTANTS
@@ -128,15 +138,20 @@ void setup() {
   startTime = millis();
   lastFlush = 0;
   lastTransmit = 0;
-  pinMode(22,OUTPUT);
-pinMode(21,OUTPUT);
-digitalWrite(22,HIGH);
-digitalWrite(21,LOW);
+
 
 
   pinMode(LED_PIN, OUTPUT); //Flashes LED when SD, BMP, or BNO not intialized
   digitalWrite(LED_PIN, LOW);
-  
+
+  //Motor Encoder
+  pinMode(HALL_SENSOR_1,OUTPUT);
+  pinMode(HALL_SENSOR_2,OUTPUT);
+  digitalWrite(HALL_SENSOR_1,HIGH);
+  digitalWrite(HALL_SENSOR_2,LOW);
+
+
+
 //#ifdef DEBUG
 //  Serial.begin(9600);
 //  for (int i = 0; i < SERIAL_TIMEOUT && !Serial; i++) {
@@ -204,39 +219,16 @@ void loop() {
   
   long loopTime = millis();
   readSensors();
-  
-   // if a new AILERON signal has been measured, lets print the value to serial, if not our code could carry on with some other processing
- if(bNewAILERONSignal)
- {
 
-   Serial.println(nAILERONIn); 
-
-   // set this back to false when we have finished
-   // with nAILERONIn, while true, calcInput will not update
-   // nAILERONIn
-   bNewAILERONSignal = false;
- }
-
- Serial.print("AILERON PWM: ");
-  Serial.println(nAILERONIn); 
-
-  nAILERONIn = map(nAILERONIn, 1000, 2000, 0, 255);
-  Serial.print("New Aileron: ");
-  Serial.println(nAILERONIn);
-
-  analogWrite(29, nAILERONIn);
-  
-
-  
-
-  
+  receivePWM();
 
 
+ 
+  DEBUG_PRINT("AILERON PWM: ");
+  DEBUG_PRINT(nAILERONIn); 
 
 
-
-  
- // other processing ...
+  writePosition(nAILERONIn, myEnc);
 
 //  if(firstSend) {
 //    firstSend = false;
@@ -262,6 +254,10 @@ void loop() {
 //  }
 
 }
+
+
+
+
 
 // Reads from all of the sensors and outputs the data string
 String readSensors() {
@@ -347,9 +343,6 @@ String readSensors() {
 
   dataStringBuffer = dataString;
 
-
-
-
   return dataString;     
 }
 
@@ -362,28 +355,10 @@ void flashLED() {
   }
 }
 
-//bool ISBDCallback() {
-//  String dataString = readSensors();
-//  long loopTime = millis();
-//
-//  if (dataFile) {
-//    DEBUG_PRINTLN("Writing to datalog.txt");
-//    dataFile.println(dataString);
-//  } else {
-//      DEBUG_PRINTLN("Error opening datalog.txt");
-//  }
-//
-//  if (loopTime - lastFlush > SD_CARD_FLUSH_TIME) {
-//    DEBUG_PRINTLN("Flushing datalog.txt");
-//    dataFile.flush();
-//    lastFlush = loopTime;
-//  }  
-//  
-//  delay(50);
-//  return true;
-//}
 
-
+/*
+ * The purpose of this function is to calculate the change from LOW to HIGH or HIGH to LOW on line from RX.
+ */
 void calcInput()
 {
   // if the pin is high, its the start of an interrupt
@@ -409,4 +384,51 @@ void calcInput()
     }
   }
 }
+
+void writePosition(int nAILERONIn, Encoder& myEnc){
+  int pos = map(nAILERONIn, LOWER_BOUND_AILERON, NEUTRAL_AILERON, LOWER_BOUND_ENCODER, UPPER_BOUND_ENCODER);
+  myEnc.write(pos);
+}
+
+void receivePWM(){
+  
+    //FOR RC SIGNAL
+   // if a new AILERON signal has been measured, lets print the value to serial, if not our code could carry on with some other processing
+if(bNewAILERONSignal)
+ {
+   // set this back to false when we have finished
+   // with nAILERONIn, while true, calcInput will not update
+   // nAILERONIn
+   bNewAILERONSignal = false;
+ }
+  
+}
+
+
+
+
+
+
+//bool ISBDCallback() {
+//  String dataString = readSensors();
+//  long loopTime = millis();
+//
+//  if (dataFile) {
+//    DEBUG_PRINTLN("Writing to datalog.txt");
+//    dataFile.println(dataString);
+//  } else {
+//      DEBUG_PRINTLN("Error opening datalog.txt");
+//  }
+//
+//  if (loopTime - lastFlush > SD_CARD_FLUSH_TIME) {
+//    DEBUG_PRINTLN("Flushing datalog.txt");
+//    dataFile.flush();
+//    lastFlush = loopTime;
+//  }  
+//  
+//  delay(50);
+//  return true;
+//}
+
+
 
