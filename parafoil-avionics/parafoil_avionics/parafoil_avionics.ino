@@ -1,21 +1,21 @@
 /*
- * Avionics for parafoil.
- * 
- * This code logs data from sensors, reads PWM values from the RC receiver, and 
- * sends a PWM signal to control speed and direction of the motors
- * 
- * Jason Kurohara and Eric Martin 
- * 
- */
+   Avionics for parafoil.
 
- #include <Encoder.h>
+   This code logs data from sensors, reads PWM values from the RC receiver, and
+   sends a PWM signal to control speed and direction of the motors
+
+   Jason Kurohara and Eric Martin
+
+*/
+
+#include <Encoder.h>
 
 // Change these two numbers to the pins connected to your encoder.
 //   Best Performance: both pins have interrupt capability
 //   Good Performance: only the first pin has interrupt capability
 //   Low Performance:  neither pin has interrupt capability
 
-Encoder myEnc(5, 6);
+
 //   avoid using pins with LEDs attached
 
 #include <Adafruit_Sensor.h>
@@ -28,11 +28,11 @@ Encoder myEnc(5, 6);
 #include <SPI.h>
 #include <Wire.h>
 
-/* 
- * Preprocessor directive to debug code using print statements
- * LED_PIN is a flashes if avionics components are not initialized
- * 
- */
+/*
+   Preprocessor directive to debug code using print statements
+   LED_PIN is a flashes if avionics components are not initialized
+
+*/
 
 #define DEBUG // comment out to turn off debugging
 #ifdef DEBUG
@@ -51,10 +51,10 @@ String dataStringBuffer = "";
 
 
 /*
- * TIMING (INTERNAL)
- * This initializes timing variables used to monitor SD card flush time, RB transmission time, 
- * and barometer measurement interval
- */
+   TIMING (INTERNAL)
+   This initializes timing variables used to monitor SD card flush time, RB transmission time,
+   and barometer measurement interval
+*/
 long startTime;
 #define SD_CARD_FLUSH_TIME 10000 // Flushes SD card every 10 Seconds
 #define ROCKBLOCK_TRANSMIT_TIME 300000 // Transmits to RB every 5 minutes
@@ -62,10 +62,10 @@ long startTime;
 #define SERIAL_TIMEOUT 60000 //Serial timeout
 
 /*
- * SPI BUS
- * This defines constants for the SPI line.  The thermocouple and SD card are on the SPI line
- */
-#define SCK_PIN 14
+   SPI BUS
+   This defines constants for the SPI line.  The thermocouple and SD card are on the SPI line
+*/
+#define SCK_PIN 13
 #define SD_READER_CS 20
 #define THERMOCOUPLE_CS 21
 
@@ -100,37 +100,43 @@ float f_lat = 0, f_long = 0;
 int sats = -1;
 long unsigned f_age = 0;
 
-#define HALL_SENSOR_1 22
-#define HALL_SENSOR_2 21
+#define HALL_SENSOR_1 5
+#define HALL_SENSOR_2 6
 #define HALL_SENSOR_3 //DEFINE 
 #define HALL_SENSOR_4 //DEFINE
+
+#define ENABLE_1 23
+#define MOTOR_1A
+#define MOTOR_1B
 
 #define LOWER_BOUND_ENCODER -100
 #define UPPER_BOUND_ENCODER 100
 
+Encoder myEnc(HALL_SENSOR_1, HALL_SENSOR_2);
+
 bool hasSD = false;
 
 /*
- * These constants are used for the ISR to read pulses from the RC receiver.
- * When state of the line changes from LOW to HIGH or HIGH to LOW, the ISR is triggered 
- * and the PWM values are red
- */
+   These constants are used for the ISR to read pulses from the RC receiver.
+   When state of the line changes from LOW to HIGH or HIGH to LOW, the ISR is triggered
+   and the PWM values are red
+*/
 #define AILERON_SIGNAL_IN 2 // INTERRUPT 2 = DIGITAL PIN 2 - use the interrupt number in attachInterrupt
 #define AILERON_SIGNAL_IN_PIN 2 // INTERRUPT 0 = DIGITAL PIN 2 - use the PIN number in digitalRead
 
 #define NEUTRAL_AILERON 1500 // this is the duration middle PWM on the aileron stick
-#define LOWER_BOUND_AILERON 1000 
+#define LOWER_BOUND_AILERON 1000
 #define UPPER_BOUND_AILERON 2000
 
 /*
- * Interrupt Service Routine (ISR) CONSTANTS
- * nAileron: Volatile, we set this in the interrupt and read it in the loop, therefore it must be declared volatile.
- * ulStartPeriod: Set in the interrupt, start time of the PWM signal
- * bNewAILERONSignal: Set in interrupt and read in loop. This indiciates when we have a new signal
- */
-volatile int nAILERONIn = NEUTRAL_AILERON; 
-volatile unsigned long ulStartPeriod = 0; 
-volatile boolean bNewAILERONSignal = false; 
+   Interrupt Service Routine (ISR) CONSTANTS
+   nAileron: Volatile, we set this in the interrupt and read it in the loop, therefore it must be declared volatile.
+   ulStartPeriod: Set in the interrupt, start time of the PWM signal
+   bNewAILERONSignal: Set in interrupt and read in loop. This indiciates when we have a new signal
+*/
+volatile int nAILERONIn = NEUTRAL_AILERON;
+volatile unsigned long ulStartPeriod = 0;
+volatile boolean bNewAILERONSignal = false;
 
 
 
@@ -145,20 +151,20 @@ void setup() {
   digitalWrite(LED_PIN, LOW);
 
   //Motor Encoder
-  pinMode(HALL_SENSOR_1,OUTPUT);
-  pinMode(HALL_SENSOR_2,OUTPUT);
-  digitalWrite(HALL_SENSOR_1,HIGH);
-  digitalWrite(HALL_SENSOR_2,LOW);
+  pinMode(HALL_SENSOR_1, OUTPUT);
+  pinMode(HALL_SENSOR_2, OUTPUT);
+  digitalWrite(HALL_SENSOR_1, HIGH);
+  digitalWrite(HALL_SENSOR_2, LOW);
 
 
 
-//#ifdef DEBUG
-//  Serial.begin(9600);
-//  for (int i = 0; i < SERIAL_TIMEOUT && !Serial; i++) {
-//    continue;
-//    delay(1000);
-//  }
-//#endif
+  //#ifdef DEBUG
+  //  Serial.begin(9600);
+  //  for (int i = 0; i < SERIAL_TIMEOUT && !Serial; i++) {
+  //    continue;
+  //    delay(1000);
+  //  }
+  //#endif
 
   // SD Card Reader
   SPI.setSCK(SCK_PIN);
@@ -166,7 +172,7 @@ void setup() {
   DEBUG_PRINTLN("Initializing SD card...");
   if (!SD.begin(SD_READER_CS)) {
     DEBUG_PRINTLN("Card failed, or not present");
-   // flashLED(); // BLOCKS CODE
+    // flashLED(); // BLOCKS CODE
   } else {
     dataFile = SD.open("datalog.txt", FILE_WRITE);
     DEBUG_PRINTLN("Card initialized.");
@@ -193,7 +199,7 @@ void setup() {
 
   pinMode(THERMOCOUPLE_CS, OUTPUT);
 
-  // Data column headers. 
+  // Data column headers.
   if (dataFile) {
     dataFile.print("Time(ms), Pressure(Pa), Alt(m), AscentRate(m/s), TempIn(C), OrientationX(deg), y(deg) , z(deg), ");
     dataFile.println("TempOut(C), GPSLat, GPSLong, GPSAge, GPSSats, RBSignalQuality");
@@ -201,60 +207,55 @@ void setup() {
 
   // RockBlock
   //IridiumSerial.begin(19200);
-//  DEBUG_PRINTLN("Starting rockblock serial");
-//  int err = modem.begin();
-//  int signalQuality = -1;
-//  DEBUG_PRINTLN(modem.getSignalQuality(signalQuality));
-//  if (err != ISBD_SUCCESS) {
-//    DEBUG_PRINT("Begin failed: error ");
-//    DEBUG_PRINTLN(err);
-//    if (err == ISBD_NO_MODEM_DETECTED) DEBUG_PRINTLN("No modem detected: check wiring.");
-//    //flashLED();
-//  }
+  //  DEBUG_PRINTLN("Starting rockblock serial");
+  //  int err = modem.begin();
+  //  int signalQuality = -1;
+  //  DEBUG_PRINTLN(modem.getSignalQuality(signalQuality));
+  //  if (err != ISBD_SUCCESS) {
+  //    DEBUG_PRINT("Begin failed: error ");
+  //    DEBUG_PRINTLN(err);
+  //    if (err == ISBD_NO_MODEM_DETECTED) DEBUG_PRINTLN("No modem detected: check wiring.");
+  //    //flashLED();
+  //  }
 
-  attachInterrupt(AILERON_SIGNAL_IN,calcInput,CHANGE);
+  attachInterrupt(AILERON_SIGNAL_IN, calcInput, CHANGE);
 }
 
 void loop() {
-  
+
   long loopTime = millis();
   readSensors();
 
   receivePWM();
 
-
- 
   DEBUG_PRINT("AILERON PWM: ");
-  DEBUG_PRINT(nAILERONIn); 
-
+  DEBUG_PRINT(nAILERONIn);
 
   writePosition(nAILERONIn, myEnc);
 
-//  if(firstSend) {
-//    firstSend = false;
-//    DEBUG_PRINTLN("Transmiting to ROCKBlock");
-//    char buf [200];
-//    modem.sendSBDText(buf);
-//    lastTransmit = loopTime;
-//  }
-  
-//   Receive RockBlock Command as two bytes: command (char), and data (byte)
-//  uint8_t buffer[2];
-//  size_t bufferSize = sizeof(buffer);
-//  DEBUG_PRINTLN("Receiving RockBlock Commands.");
-//  modem.sendReceiveSBDText(NULL, buffer, bufferSize);
-//  DEBUG_PRINTLN("Turns it it doesn't block.");
-//
-//  if (loopTime - lastTransmit > ROCKBLOCK_TRANSMIT_TIME) {
-//    DEBUG_PRINTLN("Transmiting to ROCKBlock");
-//    char buf [200];
-//    dataStringBuffer.toCharArray(buf, sizeof(buf));
-//    modem.sendSBDText(buf);
-//    lastTransmit = loopTime;
-//  }
+  //  if(firstSend) {
+  //    firstSend = false;
+  //    DEBUG_PRINTLN("Transmiting to ROCKBlock");
+  //    char buf [200];
+  //    modem.sendSBDText(buf);
+  //    lastTransmit = loopTime;
+  //  }
+  //   Receive RockBlock Command as two bytes: command (char), and data (byte)
+  //  uint8_t buffer[2];
+  //  size_t bufferSize = sizeof(buffer);
+  //  DEBUG_PRINTLN("Receiving RockBlock Commands.");
+  //  modem.sendReceiveSBDText(NULL, buffer, bufferSize);
+  //  DEBUG_PRINTLN("Turns it it doesn't block.");
+  //
+  //  if (loopTime - lastTransmit > ROCKBLOCK_TRANSMIT_TIME) {
+  //    DEBUG_PRINTLN("Transmiting to ROCKBlock");
+  //    char buf [200];
+  //    dataStringBuffer.toCharArray(buf, sizeof(buf));
+  //    modem.sendSBDText(buf);
+  //    lastTransmit = loopTime;
+  //  }
 
 }
-
 
 
 
@@ -279,7 +280,7 @@ String readSensors() {
     lastAlt = alt;
     lastAscentTime = loopTime;
   }
-  
+
   dataString += String(pressure) + ", " + String(alt) + ", ";
   dataString += String(ascentRate) + ", " + String(tempIn) + ", ";
 
@@ -310,7 +311,7 @@ String readSensors() {
   double temperature = thermocouple.readCelsius(); // celsius
   dataString += String(temperature) + ", ";
   DEBUG_PRINTLN(temperature);
-  
+
   // GPS Input
   DEBUG_PRINTLN("GPS Stuff");
 
@@ -343,7 +344,7 @@ String readSensors() {
 
   dataStringBuffer = dataString;
 
-  return dataString;     
+  return dataString;
 }
 
 void flashLED() {
@@ -357,12 +358,12 @@ void flashLED() {
 
 
 /*
- * The purpose of this function is to calculate the change from LOW to HIGH or HIGH to LOW on line from RX.
- */
+   The purpose of this function is to calculate the change from LOW to HIGH or HIGH to LOW on line from RX.
+*/
 void calcInput()
 {
   // if the pin is high, its the start of an interrupt
-  if(digitalRead(AILERON_SIGNAL_IN_PIN) == HIGH)
+  if (digitalRead(AILERON_SIGNAL_IN_PIN) == HIGH)
   {
     // get the time using micros - when our code gets really busy this will become inaccurate, but for the current application its
     // easy to understand and works very well
@@ -372,7 +373,7 @@ void calcInput()
   {
     // if the pin is low, its the falling edge of the pulse so now we can calculate the pulse duration by subtracting the
     // start time ulStartPeriod from the current time returned by micros()
-    if(ulStartPeriod && (bNewAILERONSignal == false))
+    if (ulStartPeriod && (bNewAILERONSignal == false))
     {
       nAILERONIn = (int)(micros() - ulStartPeriod);
       ulStartPeriod = 0;
@@ -385,23 +386,23 @@ void calcInput()
   }
 }
 
-void writePosition(int nAILERONIn, Encoder& myEnc){
+void writePosition(int nAILERONIn, Encoder& myEnc) {
   int pos = map(nAILERONIn, LOWER_BOUND_AILERON, NEUTRAL_AILERON, LOWER_BOUND_ENCODER, UPPER_BOUND_ENCODER);
   myEnc.write(pos);
 }
 
-void receivePWM(){
-  
-    //FOR RC SIGNAL
-   // if a new AILERON signal has been measured, lets print the value to serial, if not our code could carry on with some other processing
-if(bNewAILERONSignal)
- {
-   // set this back to false when we have finished
-   // with nAILERONIn, while true, calcInput will not update
-   // nAILERONIn
-   bNewAILERONSignal = false;
- }
-  
+void receivePWM() {
+
+  //FOR RC SIGNAL
+  // if a new AILERON signal has been measured, lets print the value to serial, if not our code could carry on with some other processing
+  if (bNewAILERONSignal)
+  {
+    // set this back to false when we have finished
+    // with nAILERONIn, while true, calcInput will not update
+    // nAILERONIn
+    bNewAILERONSignal = false;
+  }
+
 }
 
 
@@ -424,8 +425,8 @@ if(bNewAILERONSignal)
 //    DEBUG_PRINTLN("Flushing datalog.txt");
 //    dataFile.flush();
 //    lastFlush = loopTime;
-//  }  
-//  
+//  }
+//
 //  delay(50);
 //  return true;
 //}
