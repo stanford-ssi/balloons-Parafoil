@@ -1,30 +1,33 @@
-//THIS CODE USES REMOTE CONTROL RECEIVER TO SPIN MOTORS W/ ENCODER TO DESIRED POSITION USING PWM
+// this code uses remote control receiver to spin motors w/ encoder to desired position using pwm
 
 
-
-
-//LIBRARIES
+// libraries
 #include <Encoder.h>
 #include <PID_v1.h>
 
 #define AILERON_SIGNAL_IN 4 // INTERRUPT 2 = DIGITAL PIN 2 - use the interrupt number in attachInterrupt
 #define AILERON_SIGNAL_IN_PIN 4 // INTERRUPT 0 = DIGITAL PIN 2 - use the PIN number in digitalRead
-#define NEUTRAL_AILERON 1500 // this is the duration middle PWM on the aileron stick
+
+#define MOTOR_DIR_PIN_1 2
+#define MOTOR_DIR_PIN_2 3
+#define MOTOR_SPEED_PIN 14
+
 #define MIN_AILERON 1000
+#define NEUTRAL_AILERON 1500 // this is the duration middle PWM on the aileron stick
 #define MAX_AILERON 2000
-#define MAX_MOTOR 4000
+
 #define MIN_MOTOR -4000
+#define NEUTRAL_MOTOR 0
+#define MAX_MOTOR 4000
 
-enum Direction {
-  CW = -1,
-  NEUTRAL = 0,
-  CCW = 1
-};
+#define SETPOINT_MARGIN_RADIUS 10
 
-//Define Variables we'll be connecting to
+enum Direction { CW, NEUTRAL, CCW };
+
+// define variables we'll be connecting to
 double Setpoint, Input, Output;
 
-//Specify the links and initial tuning parameters
+// specify the links and initial tuning parameters
 double Kp=2, Ki=5, Kd=1; // This is for the encoder
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
@@ -34,37 +37,29 @@ long currentPos = -999;
 long newPos = -999;
 
 /*
-   Interrupt Service Routine (ISR) CONSTANTS
-   nAileron: Volatile, we set this in the interrupt and read it in the loop, therefore it must be declared volatile.
-   ulStartPeriod: Set in the interrupt, start time of the PWM signal
-   bNewAILERONSignal: Set in interrupt and read in loop. This indiciates when we have a new signal
-*/
+  Interrupt Service Routine (ISR) CONSTANTS:
+    nAileron: volatile. set in the interrupt and read in the loop: it must be declared volatile
+    ulStartPeriod: set in the interrupt, start time of the PWM signal
+    bNewAILERONSignal: set in interrupt and read in loop. indiciates when we have a new signal
+ */
 volatile int nAILERONIn = NEUTRAL_AILERON;
 volatile unsigned long ulStartPeriod = 0;
 volatile boolean bNewAILERONSignal = false;
 
 Direction dir;
 
-
-
-
-
 void setup() {
   Serial.begin(9600);
   Serial.println("Basic Encoder Test:");
 
-  pinMode(2, OUTPUT);
-  pinMode(3, OUTPUT);
-  pinMode(14, OUTPUT);
-  
-  digitalWrite(2, LOW); //STARTS LOW, IN THIS TEST, ENCODER DOES NOT KNOW DIRECITON THAT IT SPINS
-  digitalWrite(3, LOW);
+  // initialize pins
+  pinMode(MOTOR_DIR_PIN_1, OUTPUT);
+  pinMode(MOTOR_DIR_PIN_2, OUTPUT);
+  pinMode(MOTOR_SPEED_PIN, OUTPUT);
 
-  pinMode(4,INPUT);
+  pinMode(AILERON_SIGNAL_IN_PIN, INPUT);
 
-    //initialize the variables we're linked to
-  Input = analogRead(2);
-  Setpoint = 10000;
+  setDirection(NEUTRAL); // encoder does not know direciton that it spins
 
   //turn the PID on
   myPID.SetMode(AUTOMATIC);
@@ -72,46 +67,33 @@ void setup() {
   attachInterrupt(AILERON_SIGNAL_IN, calcInput, CHANGE);
 }
 
-long oldPosition  = -999;
-
 void loop() {
-
-
   receivePWM();
   Serial.print("Raw AILERON PWM: ");
   Serial.println(nAILERONIn);
 
-  if (nAILERONIn > 1480 && nAILERONIn < 1500) {
-    directionChange(0);
-  } else if(nAILERONIn > NEUTRAL_AILERON){
-    newPos = map(nAILERONIn, NEUTRAL_AILERON, MAX_AILERON, 0, MAX_MOTOR);
-    currentPos = myEnc.read();
-    Input = currentPos;
-    Setpoint = abs(newPos);
-    Serial.print("NEW SETPOINT: ");
-    Serial.println(Setpoint);
+  Input = currentPos = myEnc.read();
+  newPos = aileronToMotor(nAILERONIn);
+  Setpoint = abs(newPos);
+  Serial.print("NEW SETPOINT: ");
+  Serial.println(Setpoint);
+
+  int cmp = comparePositions(newPos, Setpoint);
+  if (cmp == 0) { // position within margins => dont move
+    setDirection(NEUTRAL); 
+    return;
+  } else { // need to move
+    if (cmp > 0) { // forward
+      setDirection(CCW);
+    } else { // cmp < 0 => backward
+      setDirection(CW);
+    } 
+
+    // compute speed
     myPID.Compute();
     Serial.print("PWM OUTPUT: ");
     Serial.println(Output);
-
-    //DIRECTION SHIT
-    directionChange(1);
-    
-    analogWrite(14, Output);
-  } else if(nAILERONIn < NEUTRAL_AILERON){
-    newPos = map(nAILERONIn, MIN_AILERON, NEUTRAL_AILERON, -4000, 0);
-    currentPos = myEnc.read();
-    Input = currentPos;
-    Setpoint = abs(newPos);
-    Serial.print("NEW SETPOINT: ");
-    Serial.println(Setpoint);
-    myPID.Compute();
-    Serial.print("PWM OUTPUT: ");
-    Serial.println(Output);
-
-    //DIRECTION SHIT
-    directionChange(-1);
-    analogWrite(14, Output);
+    analogWrite(MOTOR_SPEED_PIN, Output);
   }
 }
 
@@ -119,18 +101,14 @@ void loop() {
 void calcInput()
 {
   // if the pin is high, its the start of an interrupt
-  if (digitalRead(AILERON_SIGNAL_IN_PIN) == HIGH)
-  {
+  if (digitalRead(AILERON_SIGNAL_IN_PIN) == HIGH) {
     // get the time using micros - when our code gets really busy this will become inaccurate, but for the current application its
     // easy to understand and works very well
     ulStartPeriod = micros();
-  }
-  else
-  {
+  } else {
     // if the pin is low, its the falling edge of the pulse so now we can calculate the pulse duration by subtracting the
     // start time ulStartPeriod from the current time returned by micros()
-    if (ulStartPeriod && (bNewAILERONSignal == false))
-    {
+    if (ulStartPeriod && !bNewAILERONSignal) {
       nAILERONIn = (int)(micros() - ulStartPeriod);
       ulStartPeriod = 0;
 
@@ -143,11 +121,9 @@ void calcInput()
 }
 
 void receivePWM() {
-
   //FOR RC SIGNAL
   // if a new AILERON signal has been measured, lets print the value to serial, if not our code could carry on with some other processing
-  if (bNewAILERONSignal)
-  {
+  if (bNewAILERONSignal) {
     // set this back to false when we have finished
     // with nAILERONIn, while true, calcInput will not update
     // nAILERONIn
@@ -155,24 +131,44 @@ void receivePWM() {
   }
 }
 
-void directionChange(int dir) { //tells method to go cw or ccw.  cw and ccw will never both be false
-  if (dir == -1) {
-    Serial.println("Clockwise");
-    digitalWrite(2,HIGH); //CHECK IF THIS SPINS IN THE CORRECT DIRECTION, OTHERWISE, CHANGE!
-    digitalWrite(3,LOW);
-  } else if (dir == 0) {
-    Serial.println("Neutral");
-    digitalWrite(2, LOW);
-    digitalWrite(3, LOW);
-  } else if (dir == 1) {
-    Serial.println("Counter-Clockwise");
-    digitalWrite(2, LOW);
-    digitalWrite(3, HIGH);
-  } else {
-    Serial.println("Illegal enum value");
-    digitalWrite(2, LOW);
-    digitalWrite(3, LOW);
-  }  
+long aileronToMotor(volatile int nAILERONIn) {
+  return map(nAILERONIn, MIN_AILERON, MAX_AILERON, MIN_MOTOR, MAX_MOTOR);
+}
+
+int comparePositions(long currentPos, long setPoint) {
+  int diff = setPoint - currentPos;
+  if (abs(diff) < SETPOINT_MARGIN_RADIUS) {
+    return 0;
+  } else if (diff < 0) {
+    return -1;
+  } else { // diff > 0
+    return 1;
+  }
+}
+
+void setDirection(Direction dir) { //tells method to go cw or ccw.  cw and ccw will never both be false
+  switch (dir) {
+    case CW:
+      Serial.println("Clockwise");
+      digitalWrite(2,HIGH); //CHECK IF THIS SPINS IN THE CORRECT DIRECTION, OTHERWISE, CHANGE!
+      digitalWrite(3,LOW);
+      break;
+    case NEUTRAL:
+      Serial.println("Neutral");
+      digitalWrite(2, LOW);
+      digitalWrite(3, LOW);
+      break;
+    case CCW:
+      Serial.println("Counter-Clockwise");
+      digitalWrite(2, LOW);
+      digitalWrite(3, HIGH);
+      break;
+    default:
+      Serial.println("Illegal enum value");
+      digitalWrite(2, LOW);
+      digitalWrite(3, LOW);
+      break;
+  }
 }
 
 
