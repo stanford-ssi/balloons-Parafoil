@@ -59,6 +59,7 @@ void setup() {
 
   pinMode(AILERON_SIGNAL_IN_PIN, INPUT);
 
+  myEnc.write(NEUTRAL_MOTOR); // start off in neutral motor position
   setDirection(NEUTRAL); // encoder does not know direciton that it spins
 
   //turn the PID on
