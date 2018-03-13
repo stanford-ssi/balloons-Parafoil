@@ -5,16 +5,15 @@
 #include <Encoder.h>
 #include <PID_v1.h>
 
-#define AILERON_SIGNAL_IN 4 // INTERRUPT 2 = DIGITAL PIN 2 - use the interrupt number in attachInterrupt
-#define AILERON_SIGNAL_IN_PIN 4 // INTERRUPT 0 = DIGITAL PIN 2 - use the PIN number in digitalRead
+#define AILERON_SIGNAL 4 // INTERRUPT 2 = DIGITAL PIN 2 - use the interrupt number in attachInterrupt
 
-#define MOTOR_A_DIR_PIN_1 2
-#define MOTOR_A_DIR_PIN_2 3
-#define MOTOR_A_SPEED_PIN 14
+#define MOTOR_A_DIR_1 2
+#define MOTOR_A_DIR_2 3
+#define MOTOR_A_SPEED 14
 
-#define MOTOR_B_DIR_PIN_1 9
-#define MOTOR_B_DIR_PIN_2 8
-#define MOTOR_B_SPEED_PIN 15
+#define MOTOR_B_DIR_1 9
+#define MOTOR_B_DIR_2 8
+#define MOTOR_B_SPEED 15
 
 #define ENCODER_A_1 0
 #define ENCODER_A_2 1
@@ -65,15 +64,15 @@ void setup() {
   Serial.println("Basic Encoder Test:");
 
   // initialize pins
-  pinMode(MOTOR_A_DIR_PIN_1, OUTPUT);
-  pinMode(MOTOR_A_DIR_PIN_2, OUTPUT);
-  pinMode(MOTOR_A_SPEED_PIN, OUTPUT);
+  pinMode(MOTOR_A_DIR_1, OUTPUT);
+  pinMode(MOTOR_A_DIR_2, OUTPUT);
+  pinMode(MOTOR_A_SPEED, OUTPUT);
 
-  pinMode(MOTOR_B_DIR_PIN_1, OUTPUT);
-  pinMode(MOTOR_B_DIR_PIN_2, OUTPUT);
-  pinMode(MOTOR_B_SPEED_PIN, OUTPUT);
+  pinMode(MOTOR_B_DIR_1, OUTPUT);
+  pinMode(MOTOR_B_DIR_2, OUTPUT);
+  pinMode(MOTOR_B_SPEED, OUTPUT);
 
-  pinMode(AILERON_SIGNAL_IN_PIN, INPUT);
+  pinMode(AILERON_SIGNAL, INPUT);
 
   EncA.write(NEUTRAL_MOTOR); // start off in neutral motor position
   EncB.write(NEUTRAL_MOTOR); // start off in neutral motor position
@@ -83,7 +82,7 @@ void setup() {
   //turn the PID on
   myPID.SetMode(AUTOMATIC);
 
-  attachInterrupt(AILERON_SIGNAL_IN, calcInput, CHANGE);
+  attachInterrupt(AILERON_SIGNAL, calcInput, CHANGE);
 }
 
 void loop() {
@@ -94,7 +93,7 @@ void loop() {
   Input = currentPos = EncA.read();
   newPos = aileronToMotor(nAILERONIn);
   Setpoint = abs(newPos);
-  Serial.print("NEW SETPOINT: ");
+  Serial.print("NEW SETPT: ");
   Serial.println(Setpoint);
 
   int cmp = comparePositions(newPos, Setpoint);
@@ -112,8 +111,8 @@ void loop() {
     myPID.Compute();
     Serial.print("PWM OUTPUT: ");
     Serial.println(Output);
-    analogWrite(MOTOR_A_SPEED_PIN, 255);
-    analogWrite(MOTOR_B_SPEED_PIN, 255);
+    analogWrite(MOTOR_A_SPEED, 255);
+    analogWrite(MOTOR_B_SPEED, 255);
   }
 }
 
@@ -121,7 +120,7 @@ void loop() {
 void calcInput()
 {
   // if the pin is high, its the start of an interrupt
-  if (digitalRead(AILERON_SIGNAL_IN_PIN) == HIGH) {
+  if (digitalRead(AILERON_SIGNAL) == HIGH) {
     // get the time using micros - when our code gets really busy this will become inaccurate, but for the current application its
     // easy to understand and works very well
     ulStartPeriod = micros();
@@ -170,7 +169,7 @@ void setDirection(Direction dir) { //tells method to go cw or ccw.  cw and ccw w
   switch (dir) {
     case CW:
       Serial.println("Clockwise");
-      digitalWrite(MOTOR_A_DIR_1, HIGH); //CHECK IF THIS SPINS IN THE CORRECT DIRECTION, OTHERWISE, CHANGE!
+      digitalWrite(MOTOR_A_DIR_1, HIGH); //CHECK IF THIS SS THE CORRECT DIRECTION, OTHERWISE, CHANGE!
       digitalWrite(MOTOR_A_DIR_2, LOW);
 
       digitalWrite(MOTOR_B_DIR_1, LOW);
