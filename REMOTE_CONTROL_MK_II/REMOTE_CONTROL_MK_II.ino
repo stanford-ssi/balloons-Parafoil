@@ -8,9 +8,19 @@
 #define AILERON_SIGNAL_IN 4 // INTERRUPT 2 = DIGITAL PIN 2 - use the interrupt number in attachInterrupt
 #define AILERON_SIGNAL_IN_PIN 4 // INTERRUPT 0 = DIGITAL PIN 2 - use the PIN number in digitalRead
 
-#define MOTOR_DIR_PIN_1 2
-#define MOTOR_DIR_PIN_2 3
-#define MOTOR_SPEED_PIN 14
+#define MOTOR_A_DIR_PIN_1 2
+#define MOTOR_A_DIR_PIN_2 3
+#define MOTOR_A_SPEED_PIN 14
+
+#define MOTOR_B_DIR_PIN_1 9
+#define MOTOR_B_DIR_PIN_2 8
+#define MOTOR_B_SPEED_PIN 15
+
+#define ENCODER_A_1 0
+#define ENCODER_A_2 1
+
+#define ENCODER_B_1 11
+#define ENCODER_B_2 12
 
 #define MIN_AILERON 1000
 #define NEUTRAL_AILERON 1500 // this is the duration middle PWM on the aileron stick
@@ -31,7 +41,9 @@ double Setpoint, Input, Output;
 double Kp=2, Ki=5, Kd=1; // This is for the encoder
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
-Encoder myEnc(0, 1); //Encoder object
+// Encoder objects
+Encoder EncA(ENCODER_A_1, ENCODER_A_2);
+Encoder EncB(ENCODER_B_1, ENCODER_B_2);
 
 long currentPos = -999;
 long newPos = -999;
@@ -53,13 +65,19 @@ void setup() {
   Serial.println("Basic Encoder Test:");
 
   // initialize pins
-  pinMode(MOTOR_DIR_PIN_1, OUTPUT);
-  pinMode(MOTOR_DIR_PIN_2, OUTPUT);
-  pinMode(MOTOR_SPEED_PIN, OUTPUT);
+  pinMode(MOTOR_A_DIR_PIN_1, OUTPUT);
+  pinMode(MOTOR_A_DIR_PIN_2, OUTPUT);
+  pinMode(MOTOR_A_SPEED_PIN, OUTPUT);
+
+  pinMode(MOTOR_B_DIR_PIN_1, OUTPUT);
+  pinMode(MOTOR_B_DIR_PIN_2, OUTPUT);
+  pinMode(MOTOR_B_SPEED_PIN, OUTPUT);
 
   pinMode(AILERON_SIGNAL_IN_PIN, INPUT);
 
-  myEnc.write(NEUTRAL_MOTOR); // start off in neutral motor position
+  EncA.write(NEUTRAL_MOTOR); // start off in neutral motor position
+  EncB.write(NEUTRAL_MOTOR); // start off in neutral motor position
+
   setDirection(NEUTRAL); // encoder does not know direciton that it spins
 
   //turn the PID on
@@ -73,7 +91,7 @@ void loop() {
   Serial.print("Raw AILERON PWM: ");
   Serial.println(nAILERONIn);
 
-  Input = currentPos = myEnc.read();
+  Input = currentPos = EncA.read();
   newPos = aileronToMotor(nAILERONIn);
   Setpoint = abs(newPos);
   Serial.print("NEW SETPOINT: ");
@@ -94,7 +112,8 @@ void loop() {
     myPID.Compute();
     Serial.print("PWM OUTPUT: ");
     Serial.println(Output);
-    analogWrite(MOTOR_SPEED_PIN, Output);
+    analogWrite(MOTOR_A_SPEED_PIN, 255);
+    analogWrite(MOTOR_B_SPEED_PIN, 255);
   }
 }
 
@@ -151,23 +170,35 @@ void setDirection(Direction dir) { //tells method to go cw or ccw.  cw and ccw w
   switch (dir) {
     case CW:
       Serial.println("Clockwise");
-      digitalWrite(2,HIGH); //CHECK IF THIS SPINS IN THE CORRECT DIRECTION, OTHERWISE, CHANGE!
-      digitalWrite(3,LOW);
+      digitalWrite(MOTOR_A_DIR_1, HIGH); //CHECK IF THIS SPINS IN THE CORRECT DIRECTION, OTHERWISE, CHANGE!
+      digitalWrite(MOTOR_A_DIR_2, LOW);
+
+      digitalWrite(MOTOR_B_DIR_1, LOW);
+      digitalWrite(MOTOR_B_DIR_2, HIGH);
       break;
     case NEUTRAL:
       Serial.println("Neutral");
-      digitalWrite(2, LOW);
-      digitalWrite(3, LOW);
+      digitalWrite(MOTOR_A_DIR_1, LOW);
+      digitalWrite(MOTOR_A_DIR_2, LOW);
+
+      digitalWrite(MOTOR_B_DIR_1, LOW);
+      digitalWrite(MOTOR_B_DIR_2, LOW);
       break;
     case CCW:
       Serial.println("Counter-Clockwise");
-      digitalWrite(2, LOW);
-      digitalWrite(3, HIGH);
+      digitalWrite(MOTOR_A_DIR_1, LOW);
+      digitalWrite(MOTOR_A_DIR_2, HIGH);
+
+      digitalWrite(MOTOR_B_DIR_1, HIGH);
+      digitalWrite(MOTOR_B_DIR_2, LOW);
       break;
     default:
       Serial.println("Illegal enum value");
-      digitalWrite(2, LOW);
-      digitalWrite(3, LOW);
+      digitalWrite(MOTOR_A_DIR_1, LOW);
+      digitalWrite(MOTOR_A_DIR_2, LOW);
+
+      digitalWrite(MOTOR_B_DIR_1, LOW);
+      digitalWrite(MOTOR_B_DIR_2, LOW);
       break;
   }
 }
