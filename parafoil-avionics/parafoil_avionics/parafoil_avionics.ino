@@ -4,11 +4,11 @@
    This code logs data from sensors, reads PWM values from the RC receiver, and
    sends a PWM signal to control speed and direction of the motors
 
-   Jason Kurohara and Eric Martin
+   
 
 */
 
-#include <Encoder.h>
+
 
 // Change these two numbers to the pins connected to your encoder.
 //   Best Performance: both pins have interrupt capability
@@ -17,7 +17,8 @@
 
 
 //   avoid using pins with LEDs attached
-
+#include <Encoder.h>
+#include <PID_v1.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BMP280.h>
 #include <Adafruit_BNO055.h>
@@ -27,6 +28,9 @@
 #include <SD.h>
 #include <SPI.h>
 #include <Wire.h>
+
+#define AILERON_SIGNAL 6 // INTERRUPT 2 = DIGITAL PIN 2 - use the interrupt number in attachInterrupt
+
 
 /*
    Preprocessor directive to debug code using print statements
@@ -44,6 +48,59 @@
 #endif
 
 #define LED_PIN 22
+
+#define MOTOR_A_DIR_1 0
+#define MOTOR_A_DIR_2 1
+#define MOTOR_A_SPEED 14
+
+#define MOTOR_B_DIR_1 2
+#define MOTOR_B_DIR_2 3
+#define MOTOR_B_SPEED 15
+
+#define ENCODER_A_1 4
+#define ENCODER_A_2 5
+
+#define ENCODER_B_1 9
+#define ENCODER_B_2 10
+
+#define MIN_AILERON 1000
+#define NEUTRAL_AILERON 1500 // this is the duration middle PWM on the aileron stick
+#define MAX_AILERON 2000
+
+#define MIN_MOTOR -4000
+#define NEUTRAL_MOTOR 0
+#define MAX_MOTOR 4000
+
+#define SETPOINT_MARGIN_RADIUS 10
+
+enum Direction { CW, NEUTRAL, CCW };
+
+// define variables we'll be connecting to
+double Setpoint, Input, Output;
+
+// specify the links and initial tuning parameters
+double Kp=2, Ki=5, Kd=1; // This is for the encoder
+PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+
+// Encoder objects
+Encoder EncA(ENCODER_A_1, ENCODER_A_2);
+Encoder EncB(ENCODER_B_1, ENCODER_B_2);
+
+long currentPos = 0;
+long currentPos2 = 0;
+long newPos = 0;
+
+/*
+  Interrupt Service Routine (ISR) CONSTANTS:
+    nAileron: volatile. set in the interrupt and read in the loop: it must be declared volatile
+    ulStartPeriod: set in the interrupt, start time of the PWM signal
+    bNewAILERONSignal: set in interrupt and read in loop. indiciates when we have a new signal
+ */
+volatile int nAILERONIn = NEUTRAL_AILERON;
+volatile unsigned long ulStartPeriod = 0;
+volatile boolean bNewAILERONSignal = false;
+
+Direction dir;
 
 
 bool firstSend = true;
@@ -100,43 +157,9 @@ float f_lat = 0, f_long = 0;
 int sats = -1;
 long unsigned f_age = 0;
 
-#define HALL_SENSOR_1 5
-#define HALL_SENSOR_2 6
-#define HALL_SENSOR_3 //DEFINE 
-#define HALL_SENSOR_4 //DEFINE
-
-#define ENABLE_1 23
-#define MOTOR_1A
-#define MOTOR_1B
-
-#define LOWER_BOUND_ENCODER -100
-#define UPPER_BOUND_ENCODER 100
-
-Encoder myEnc(HALL_SENSOR_1, HALL_SENSOR_2);
 
 bool hasSD = false;
 
-/*
-   These constants are used for the ISR to read pulses from the RC receiver.
-   When state of the line changes from LOW to HIGH or HIGH to LOW, the ISR is triggered
-   and the PWM values are red
-*/
-#define AILERON_SIGNAL_IN 2 // INTERRUPT 2 = DIGITAL PIN 2 - use the interrupt number in attachInterrupt
-#define AILERON_SIGNAL_IN_PIN 2 // INTERRUPT 0 = DIGITAL PIN 2 - use the PIN number in digitalRead
-
-#define NEUTRAL_AILERON 1500 // this is the duration middle PWM on the aileron stick
-#define LOWER_BOUND_AILERON 1000
-#define UPPER_BOUND_AILERON 2000
-
-/*
-   Interrupt Service Routine (ISR) CONSTANTS
-   nAileron: Volatile, we set this in the interrupt and read it in the loop, therefore it must be declared volatile.
-   ulStartPeriod: Set in the interrupt, start time of the PWM signal
-   bNewAILERONSignal: Set in interrupt and read in loop. This indiciates when we have a new signal
-*/
-volatile int nAILERONIn = NEUTRAL_AILERON;
-volatile unsigned long ulStartPeriod = 0;
-volatile boolean bNewAILERONSignal = false;
 
 
 
@@ -149,12 +172,6 @@ void setup() {
 
   pinMode(LED_PIN, OUTPUT); //Flashes LED when SD, BMP, or BNO not intialized
   digitalWrite(LED_PIN, LOW);
-
-  //Motor Encoder
-  pinMode(HALL_SENSOR_1, OUTPUT);
-  pinMode(HALL_SENSOR_2, OUTPUT);
-  digitalWrite(HALL_SENSOR_1, HIGH);
-  digitalWrite(HALL_SENSOR_2, LOW);
 
 
 
@@ -218,20 +235,67 @@ void setup() {
   //    //flashLED();
   //  }
 
-  attachInterrupt(AILERON_SIGNAL_IN, calcInput, CHANGE);
+  // initialize pins
+  pinMode(MOTOR_A_DIR_1, OUTPUT);
+  pinMode(MOTOR_A_DIR_2, OUTPUT);
+  pinMode(MOTOR_A_SPEED, OUTPUT);
+
+  pinMode(MOTOR_B_DIR_1, OUTPUT);
+  pinMode(MOTOR_B_DIR_2, OUTPUT);
+  pinMode(MOTOR_B_SPEED, OUTPUT);
+
+  pinMode(AILERON_SIGNAL, INPUT);
+
+  EncA.write(NEUTRAL_MOTOR); // start off in neutral motor position
+  EncB.write(NEUTRAL_MOTOR); // start off in neutral motor position
+
+  setDirection(NEUTRAL); // encoder does not know direciton that it spins
+
+  //turn the PID on
+  myPID.SetMode(AUTOMATIC);
+
+  attachInterrupt(AILERON_SIGNAL, calcInput, CHANGE);
 }
 
 void loop() {
 
   long loopTime = millis();
   readSensors();
-
+  
   receivePWM();
+  Serial.print("Raw AILERON PWM: ");
+  Serial.println(nAILERONIn);
 
-  DEBUG_PRINT("AILERON PWM: ");
-  DEBUG_PRINT(nAILERONIn);
+  currentPos = EncB.read(); 
+  currentPos2 = EncB.read();
+  Serial.print("Current pos: ");
+  Serial.println(currentPos);
+  Serial.print("Current pos 2: ");
+  Serial.println(currentPos2);
+  Input = currentPos;
+  newPos = aileronToMotor(nAILERONIn);
+  Setpoint = abs(newPos);
+  Serial.print("NEW SETPT: ");
+  Serial.println(Setpoint);
 
-  writePosition(nAILERONIn, myEnc);
+  int cmp = comparePositions(currentPos, newPos);
+  if (cmp == 0) { // position within margins => dont move
+    setDirection(NEUTRAL); 
+    return;
+  } else { // need to move
+    if (cmp > 0) { // forward
+      setDirection(CCW);
+    } else { // cmp < 0 => backward
+      setDirection(CW);
+    } 
+
+    // compute speed
+    myPID.Compute();
+    Serial.print("PWM OUTPUT: ");
+    Serial.println(Output);
+    analogWrite(MOTOR_A_SPEED, 255);
+    analogWrite(MOTOR_B_SPEED, 255);
+  }
 
   //  if(firstSend) {
   //    firstSend = false;
@@ -356,25 +420,17 @@ void flashLED() {
   }
 }
 
-
-/*
-   The purpose of this function is to calculate the change from LOW to HIGH or HIGH to LOW on line from RX.
-*/
 void calcInput()
 {
   // if the pin is high, its the start of an interrupt
-  if (digitalRead(AILERON_SIGNAL_IN_PIN) == HIGH)
-  {
+  if (digitalRead(AILERON_SIGNAL) == HIGH) {
     // get the time using micros - when our code gets really busy this will become inaccurate, but for the current application its
     // easy to understand and works very well
     ulStartPeriod = micros();
-  }
-  else
-  {
+  } else {
     // if the pin is low, its the falling edge of the pulse so now we can calculate the pulse duration by subtracting the
     // start time ulStartPeriod from the current time returned by micros()
-    if (ulStartPeriod && (bNewAILERONSignal == false))
-    {
+    if (ulStartPeriod && !bNewAILERONSignal) {
       nAILERONIn = (int)(micros() - ulStartPeriod);
       ulStartPeriod = 0;
 
@@ -386,24 +442,69 @@ void calcInput()
   }
 }
 
-void writePosition(int nAILERONIn, Encoder& myEnc) {
-  int pos = map(nAILERONIn, LOWER_BOUND_AILERON, NEUTRAL_AILERON, LOWER_BOUND_ENCODER, UPPER_BOUND_ENCODER);
-  myEnc.write(pos);
-}
-
 void receivePWM() {
-
   //FOR RC SIGNAL
   // if a new AILERON signal has been measured, lets print the value to serial, if not our code could carry on with some other processing
-  if (bNewAILERONSignal)
-  {
+  if (bNewAILERONSignal) {
     // set this back to false when we have finished
     // with nAILERONIn, while true, calcInput will not update
     // nAILERONIn
     bNewAILERONSignal = false;
   }
-
 }
+
+long aileronToMotor(volatile int nAILERONIn) {
+  return map(nAILERONIn, MIN_AILERON, MAX_AILERON, MIN_MOTOR, MAX_MOTOR);
+}
+
+int comparePositions(long currentPos, long newPos) {
+  int diff = newPos - currentPos;
+  if (abs(diff) <= SETPOINT_MARGIN_RADIUS) {
+    return 0;
+  } else if (diff < 0) {
+    return -1;
+  } else { // diff > 0
+    return 1;
+  }
+}
+
+void setDirection(Direction dir) { //tells method to go cw or ccw.  cw and ccw will never both be false
+  switch (dir) {
+    case CW:
+      Serial.println("Clockwise");
+      digitalWrite(MOTOR_A_DIR_1, LOW); //CHECK IF THIS SS THE CORRECT DIRECTION, OTHERWISE, CHANGE!
+      digitalWrite(MOTOR_A_DIR_2, HIGH);
+
+      digitalWrite(MOTOR_B_DIR_1, HIGH);
+      digitalWrite(MOTOR_B_DIR_2, LOW);
+      break;
+    case NEUTRAL:
+      Serial.println("Neutral");
+      digitalWrite(MOTOR_A_DIR_1, LOW);
+      digitalWrite(MOTOR_A_DIR_2, LOW);
+
+      digitalWrite(MOTOR_B_DIR_1, LOW);
+      digitalWrite(MOTOR_B_DIR_2, LOW);
+      break;
+    case CCW:
+      Serial.println("Counter-Clockwise");
+      digitalWrite(MOTOR_A_DIR_1, HIGH);
+      digitalWrite(MOTOR_A_DIR_2, LOW);
+
+      digitalWrite(MOTOR_B_DIR_1, LOW);
+      digitalWrite(MOTOR_B_DIR_2, HIGH);
+      break;
+    default:
+      Serial.println("Illegal enum value");
+      digitalWrite(MOTOR_A_DIR_1, LOW);
+      digitalWrite(MOTOR_A_DIR_2, LOW);
+
+      digitalWrite(MOTOR_B_DIR_1, LOW);
+      digitalWrite(MOTOR_B_DIR_2, LOW);
+      break;
+  }
+}
+
 
 
 
