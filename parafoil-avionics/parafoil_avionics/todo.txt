@@ -1,5 +1,6 @@
-0) Reconfigure everyone to platformio
-0) Get encoders working
-1) Figure out why VALBAL libraries in the lib folder and not in the platformio.ini file --> I think that might just be bad practice?
-2) Create/implement standard profile library
-3) Typecast pinouts to static const uint8_t
+ - Refactor code to PlatformIO
+ - Get encoders working
+ - Specify library versions
+ - Fix typecasting
+ - Refactor code into files
+ - Create Standard Profile library
