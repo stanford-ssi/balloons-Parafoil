@@ -45,4 +45,4 @@ This is the Parafoil/PlatformIO install guide! You should be able to (1) build c
  - Stage and commit changes before pushing by clicking the file counter in the bottom right corner (it should say "[#] files"), adding relevant files, adding a commit message, and clicking "Commit". Push by clicking the arrows and clicking the up arrow when the menu comes up. (Make sure to pull first!)
  - If opening the terminal in PlatformIO hangs, go to the packages menu and reinstall "platformio-ide-terminal"
 
-### *Last Updated: 3/15/18 @ 9:45PM*
+### *Last Updated: 3/15/18 @ 10:14PM
