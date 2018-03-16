@@ -2,3 +2,7 @@
 .piolibdeps
 .clang_complete
 .gcc-flags.json
+.travis.yml
+src/Cutdown.h
+.DS_Store
+lib/readme.txt

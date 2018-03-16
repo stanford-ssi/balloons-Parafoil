@@ -1,6 +1,0 @@
- - Refactor code to PlatformIO
- - Get encoders working
- - Specify library versions
- - Fix typecasting
- - Refactor code into files
- - Create Standard Profile library
