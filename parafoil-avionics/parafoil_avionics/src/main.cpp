@@ -1,10 +1,7 @@
 /*
    Avionics for parafoil.
-
    This code logs data from sensors, reads PWM values from the RC receiver, and
    sends a PWM signal to control speed and direction of the motors
-
-   
 
 */
 
@@ -17,13 +14,13 @@
 
 
 //   avoid using pins with LEDs attached
+#include <Arduino.h>
 #include <Encoder.h>
 #include <PID_v1.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BMP280.h>
 #include <Adafruit_BNO055.h>
 #include <Adafruit_MAX31855.h>
-#include <IridiumSBD.h>
 #include <TinyGPS++.h>
 #include <SD.h>
 #include <SPI.h>
@@ -35,7 +32,6 @@
 /*
    Preprocessor directive to debug code using print statements
    LED_PIN is a flashes if avionics components are not initialized
-
 */
 
 #define DEBUG // comment out to turn off debugging
@@ -145,11 +141,6 @@ double ascentRate;              // Last calculated rate, to fill forward in logg
 //BNO055 (I2C) IMU
 Adafruit_BNO055 bno;
 
-// ROCKBlock (Hardware Serial) Radio
-long lastTransmit;
-#define IridiumSerial Serial3
-IridiumSBD modem(IridiumSerial);
-
 // GPS (Hardware Serial) GPS
 TinyGPSPlus gps;
 float f_lat = 0, f_long = 0;
@@ -161,12 +152,18 @@ long unsigned f_age = 0;
 bool hasSD = false;
 
 
-
+// Prototypes
+String readSensors();
+void flashLED();
+void calcInput();
+void receivePWM();
+long aileronToMotor(volatile int nAILERONIn);
+int comparePositions(long currentPos, long newPos);
+void setDirection(Direction dir);
 
 void setup() {
   startTime = millis();
   lastFlush = 0;
-  lastTransmit = 0;
 
 
 
@@ -261,12 +258,12 @@ void loop() {
 
   long loopTime = millis();
   readSensors();
-  
+
   receivePWM();
   Serial.print("Raw AILERON PWM: ");
   Serial.println(nAILERONIn);
 
-  currentPos = EncB.read(); 
+  currentPos = EncB.read();
   currentPos2 = EncB.read();
   Serial.print("Current pos: ");
   Serial.println(currentPos);
@@ -280,14 +277,14 @@ void loop() {
 
   int cmp = comparePositions(currentPos, newPos);
   if (cmp == 0) { // position within margins => dont move
-    setDirection(NEUTRAL); 
+    setDirection(NEUTRAL);
     return;
   } else { // need to move
     if (cmp > 0) { // forward
       setDirection(CCW);
     } else { // cmp < 0 => backward
       setDirection(CW);
-    } 
+    }
 
     // compute speed
     myPID.Compute();
@@ -402,10 +399,6 @@ String readSensors() {
   DEBUG_PRINTLN(sats);
   DEBUG_PRINTLN("");
 
-  int signalQuality = -1;
-  modem.getSignalQuality(signalQuality);
-  dataString += String(signalQuality) + ", ";
-
   dataStringBuffer = dataString;
 
   return dataString;
@@ -504,32 +497,3 @@ void setDirection(Direction dir) { //tells method to go cw or ccw.  cw and ccw w
       break;
   }
 }
-
-
-
-
-
-
-
-//bool ISBDCallback() {
-//  String dataString = readSensors();
-//  long loopTime = millis();
-//
-//  if (dataFile) {
-//    DEBUG_PRINTLN("Writing to datalog.txt");
-//    dataFile.println(dataString);
-//  } else {
-//      DEBUG_PRINTLN("Error opening datalog.txt");
-//  }
-//
-//  if (loopTime - lastFlush > SD_CARD_FLUSH_TIME) {
-//    DEBUG_PRINTLN("Flushing datalog.txt");
-//    dataFile.flush();
-//    lastFlush = loopTime;
-//  }
-//
-//  delay(50);
-//  return true;
-//}
-
-
