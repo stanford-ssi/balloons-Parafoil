@@ -6,7 +6,7 @@ int main(void){
   Log sdcard;
 
   sensors.initializeSensors();
-  sdcard.initializeSD();
+  sdcard.initializeSD(sensors);
 
   while(true){
     sensors.readAllSensors();

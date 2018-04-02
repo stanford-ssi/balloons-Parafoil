@@ -11,7 +11,6 @@
 #include <Adafruit_BNO055.h>
 #include "TinyGPS++.h"
 
-
 #include "Constants.h"
 
 class Sensors{

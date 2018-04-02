@@ -8,30 +8,51 @@
 
 #include "Sensors.h"
 
+/*
+ *Function: initializeSensors()
+ *
+ *This function initializes the BMP280, BNO, and GPS.
+ *
+ *
+ */
 bool Sensors::initializeSensors(){
   bool success = true;
 
   pinMode(LED_PIN, OUTPUT);
 
   if(!bmp.begin()){
-    Serial.println("BMP280 could not be initialized.  Check wiring!");
+    while(true){
+      Serial.println("BMP280 could not be initialized.  Check wiring!");
+      flashLED();
+    }
     success = false;
   }
 
-  else if(!bno.begin()){
-    Serial.println("BNO could not be initialized. Check wiring!");
+  if(!bno.begin()){
+
     success = false;
   }
-  bno.setExtCrystalUse(true); /* Use external crystal for better accuracy */
+  //bno.setExtCrystalaUse(true); /* Use external crystal for better accuracy */
 
-  Serial1.begin(9600);
+  Serial1.begin(9600); //Begins serial communication with GPS
+
   if(!Serial1.available()){
-    Serial.println("GPS could not be initliazed. Check wiring!");
+    while(true){
+      Serial.println("GPS could not be initliazed. Check wiring!");
+      flashLED();
+    }
     success = false;
   }
   return success;
 }
 
+/*
+ *Function: getTemp()
+ *
+ *This function reads the BMP280 for temperature data.  This is the temperature inside
+ the payload
+ *
+ */
 double Sensors::getTemp(){
   double tempIn = bmp.readTemperature(); //create new variable each time method is called?
   return tempIn;
@@ -69,12 +90,11 @@ double Sensors::getOrientationZ(){
 }
 
 void Sensors::flashLED(){
-  while (true) {
     digitalWrite(LED_PIN, HIGH);
     delay(500);
     digitalWrite(LED_PIN, LOW);
     delay(500);
-  }
+
 }
 
 double Sensors::getLat(){
@@ -113,14 +133,14 @@ uint8_t Sensors::getSats(){
 String Sensors::readAllSensors(){
   dataString = "";
   dataString += String(getTemp());
-  dataString += String(getAlt());
-  dataString += String(getPressure());
-  dataString += String(getOrientationX());
-  dataString += String(getOrientationY());
-  dataString += String(getOrientationZ());
-  dataString += String(getLat());
-  dataString += String(getLon());
-  dataString += String(getSats());
+  dataString += " " + String(getAlt());
+  dataString += " " + String(getPressure());
+  dataString += " " + String(getOrientationX());
+  dataString += " " + String(getOrientationY());
+  dataString += " " + String(getOrientationZ());
+  dataString += " " + String(getLat());
+  dataString += " " + String(getLon());
+  dataString += " " + String(getSats());
   Serial.println(dataString);
   return dataString;
 }

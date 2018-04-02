@@ -13,13 +13,11 @@
 
 class Log{
 public:
-  bool initializeSD();
+  /*************FUNCTIONS*********/
+  bool initializeSD(Sensors& sensors);
   void writeSD(Sensors& sensors);
 
-
-
-
 private:
-
+  /*************OBJECTS***********/
   File dataFile;
 };

@@ -8,14 +8,20 @@
 #include "Log.h"
 
 
-bool Log::initializeSD(){
+
+bool Log::initializeSD(Sensors& sensors){
   bool success = true;
   pinMode(SD_READER_CS, OUTPUT);
   SPI.setSCK(SCK_PIN);
   Serial.println("Initiliazing SD card");
 
   if (!SD.begin(SD_READER_CS)) {
-    Serial.println("Card failed, or not present");
+    while(true){
+      Serial.println("Card failed, or not present");
+      sensors.flashLED();
+    }
+
+
     success = false;
   }
   else{
