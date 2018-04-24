@@ -5,6 +5,8 @@
   --------------------------
   Interface to sensors on avionics hardware.
 */
+#ifndef SENSORS_H
+#define SENSORS_H
 
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BMP280.h>
@@ -47,3 +49,5 @@ private:
   TinyGPSPlus gps;
 
 };
+
+#endif

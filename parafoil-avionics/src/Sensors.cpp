@@ -10,10 +10,7 @@
 
 /*
  *Function: initializeSensors()
- *
  *This function initializes the BMP280, BNO, and GPS.
- *
- *
  */
 bool Sensors::initializeSensors(){
   bool success = true;
@@ -48,10 +45,8 @@ bool Sensors::initializeSensors(){
 
 /*
  *Function: getTemp()
- *
  *This function reads the BMP280 for temperature data.  This is the temperature inside
  the payload
- *
  */
 double Sensors::getTemp(){
   double tempIn = bmp.readTemperature(); //create new variable each time method is called?
