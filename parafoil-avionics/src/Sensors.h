@@ -30,6 +30,7 @@ public:
   double getTemp();
   double getPressure();
   double getAlt();
+  double getAscentRate();
 
   //BNO
   double getOrientationX();
@@ -43,6 +44,11 @@ public:
   uint8_t getSats();
 
 private:
+  long lastAscentTime;             // Time of last ascent rate calculation
+  double lastAlt;                 // Last altitude, for calculation
+  double ascentRate;              // Last calculated rate, to fill forward in logging
+
+
   /*************OBJECTS***********/
   Adafruit_BMP280 bmp;
   Adafruit_BNO055 bno;

@@ -20,21 +20,23 @@ bool Log::initializeSD(Sensors& sensors){
       Serial.println("Card failed, or not present");
       sensors.flashLED();
     }
-
-
     success = false;
   }
+
   else{
     dataFile = SD.open("datalog.txt", FILE_WRITE);
     Serial.println("SD card intialized.");
     dataFile.print("Time(ms), Pressure(Pa), Alt(m), AscentRate(m/s), TempIn(C), OrientationX(deg), y(deg) , z(deg), ");
     dataFile.println("GPSLat, GPSLong, GPSSats, RBSigalQuality");
+    dataFile.close();
   }
 
   return success;
 }
 
 void Log::writeSD(Sensors& sensors){
+  dataFile = SD.open("datalog.txt", FILE_WRITE);
   dataFile.println(sensors.readAllSensors());
+  dataFile.close();
 
 }

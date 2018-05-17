@@ -12,8 +12,12 @@ public:
   void initialize();
   void record();
   void actuate(volatile int aileronPWM, long startTime, volatile boolean newSignal);
+  void cutdown();
 
 private:
+
+  bool release = false;
+  long applyheat = 0;
   /********************OBJECTS*************************/
   Sensors sensors;
   Receiver receiver;

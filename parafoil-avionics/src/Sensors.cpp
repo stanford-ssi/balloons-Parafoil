@@ -16,6 +16,7 @@ bool Sensors::initializeSensors(){
   bool success = true;
 
   pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW);
 
   if(!bmp.begin()){
     while(true){
@@ -26,28 +27,32 @@ bool Sensors::initializeSensors(){
   }
 
   if(!bno.begin()){
+    while(true){
+      Serial.println("BNO could not be initialized.  Check wiring!");
+      flashLED();
+    }
 
     success = false;
   }
   //bno.setExtCrystalaUse(true); /* Use external crystal for better accuracy */
 
-  Serial1.begin(9600); //Begins serial communication with GPS
+  Serial3.begin(9600); //Begins serial communication with GPS
+  delay(1000);
 
-  if(!Serial1.available()){
+  if(!Serial3.available()){
     while(true){
       Serial.println("GPS could not be initliazed. Check wiring!");
       flashLED();
     }
     success = false;
   }
+
+  lastAscentTime = 0;             // Time of last ascent rate calculation
+  lastAlt = 0.0;                 // Last altitude, for calculation
+  ascentRate = 0.0;              // Last calculated rate, to fill forward in logging
   return success;
 }
 
-/*
- *Function: getTemp()
- *This function reads the BMP280 for temperature data.  This is the temperature inside
- the payload
- */
 double Sensors::getTemp(){
   double tempIn = bmp.readTemperature(); //create new variable each time method is called?
   return tempIn;
@@ -61,6 +66,18 @@ double Sensors::getPressure(){
 double Sensors::getAlt(){
   double alt = bmp.readAltitude(LAUNCH_SITE_PRESSURE);//create new variable each loop?
   return alt;
+}
+
+double Sensors::getAscentRate(){
+  long looptime = millis();
+  double ascentRate = 0.0;
+  if( looptime - lastAscentTime > BAROMETER_MEASURMENT_INTERVAL){
+    double alt = getAlt();
+    ascentRate = (alt - lastAlt) * 1000 / (looptime - lastAscentTime);
+    lastAlt = alt;
+    lastAscentTime = looptime;
+  }
+  return ascentRate;
 }
 
 double Sensors::getOrientationX(){
@@ -127,9 +144,11 @@ uint8_t Sensors::getSats(){
 
 String Sensors::readAllSensors(){
   dataString = "";
-  dataString += String(getTemp());
+  dataString += String(millis());
+  dataString += " " + String(getTemp());
   dataString += " " + String(getAlt());
   dataString += " " + String(getPressure());
+  dataString += " " + String(getAscentRate());
   dataString += " " + String(getOrientationX());
   dataString += " " + String(getOrientationY());
   dataString += " " + String(getOrientationZ());
