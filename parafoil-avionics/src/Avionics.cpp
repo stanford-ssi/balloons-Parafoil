@@ -23,7 +23,7 @@ void Avionics::record(){
 
 void Avionics::cutdown(){
 
-  if(!trig && ( sensors.getALt() > CUTDOWN_ALT) && (release == false)){
+  if(!trig && ( sensors.getAlt() > CUTDOWN_ALT ) && (release == false) ){
     pinMode(WIRE, INPUT_PULLUP); //turn on nichrome
     release = true;
     applyheat = millis();
