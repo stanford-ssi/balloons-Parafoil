@@ -16,7 +16,8 @@ bool Sensors::initializeSensors(){
   bool success = true;
 
   pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, LOW);
+  digitalWrite(LED_PIN, HIGH);
+  delay(5000);
 
   if(!bmp.begin()){
     while(true){
@@ -47,9 +48,9 @@ bool Sensors::initializeSensors(){
     success = false;
   }
 
-  lastAscentTime = 0;             // Time of last ascent rate calculation
-  lastAlt = 0.0;                 // Last altitude, for calculation
-  ascentRate = 0.0;              // Last calculated rate, to fill forward in logging
+ lastAscentTime = 0;             // Time of last ascent rate calculation
+ lastAlt = 0.0;                 // Last altitude, for calculation
+ ascentRate = 0.0;              // Last calculated rate, to fill forward in logging
   return success;
 }
 
@@ -143,12 +144,16 @@ uint8_t Sensors::getSats(){
 }
 
 String Sensors::readAllSensors(){
+
   dataString = "";
   dataString += String(millis());
-  dataString += " " + String(getTemp());
+//
+  bmp.begin(); //BEGIN EVERY LOOP
+//  bno.begin();
+  dataString += " " + String(bmp.readTemperature());
   dataString += " " + String(getAlt());
   dataString += " " + String(getPressure());
-  dataString += " " + String(getAscentRate());
+ dataString += " " + String(getAscentRate());
   dataString += " " + String(getOrientationX());
   dataString += " " + String(getOrientationY());
   dataString += " " + String(getOrientationZ());

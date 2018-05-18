@@ -12,8 +12,6 @@
 #include <SD.h>
 #include "Sensors.h"
 
-
-
 class Log{
 public:
   /*************FUNCTIONS*********/
@@ -24,4 +22,5 @@ private:
   /*************OBJECTS***********/
   File dataFile;
 };
+
 #endif

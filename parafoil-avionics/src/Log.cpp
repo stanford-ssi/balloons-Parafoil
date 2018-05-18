@@ -36,6 +36,7 @@ bool Log::initializeSD(Sensors& sensors){
 
 void Log::writeSD(Sensors& sensors){
   dataFile = SD.open("datalog.txt", FILE_WRITE);
+  //Serial.println(sensors.readAllSensors());
   dataFile.println(sensors.readAllSensors());
   dataFile.close();
 

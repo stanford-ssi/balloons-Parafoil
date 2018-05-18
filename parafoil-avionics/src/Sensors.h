@@ -44,9 +44,9 @@ public:
   uint8_t getSats();
 
 private:
-  long lastAscentTime;             // Time of last ascent rate calculation
-  double lastAlt;                 // Last altitude, for calculation
-  double ascentRate;              // Last calculated rate, to fill forward in logging
+ long lastAscentTime;             // Time of last ascent rate calculation
+ double lastAlt;                 // Last altitude, for calculation
+ double ascentRate;              // Last calculated rate, to fill forward in logging
 
 
   /*************OBJECTS***********/

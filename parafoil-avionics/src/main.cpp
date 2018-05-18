@@ -11,12 +11,10 @@ int main(void){
   Avionics avionics;
 
   avionics.initialize();
-
   while(true){
-    Serial.println("loop start");
     avionics.record();
-    avionics.cutdown();
-
+  //  avionics.cutdown();
   }
+
   return 0;
 }

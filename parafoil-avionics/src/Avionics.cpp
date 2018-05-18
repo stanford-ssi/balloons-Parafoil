@@ -4,26 +4,19 @@
 void Avionics::initialize(){
   Serial.begin(9600);
   delay(5000);
-  Serial.println("Hello world");
   sensors.initializeSensors();
-  Serial.println("sensors done");
   sdcard.initializeSD(sensors);
-  Serial.println("sd done");
 
   pinMode(WIRE, OUTPUT);
   digitalWrite(WIRE,LOW); //NICHROME WIRE SHOULD BE OFF FIRST
   //receiver.initializeReceiver();
 
-
-
 }
-void Avionics::record(){
-  Serial.println("pre read");
-  sensors.readAllSensors();
-  Serial.println("post read");
-  sdcard.writeSD(sensors);
-  Serial.println("write sd)");
 
+void Avionics::record(){
+
+  //sensors.readAllSensors();
+  sdcard.writeSD(sensors);
 }
 
 void Avionics::cutdown(){
@@ -36,7 +29,7 @@ void Avionics::cutdown(){
 
   if(release){
     if(millis() - applyheat > RELEASE_TIME * 1000){
-      digitalWrite(WIRE,LOW);
+      digitalWrite(WIRE,LOW); //turn off nichrome wire
       release = false;
     }
   }
