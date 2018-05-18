@@ -153,7 +153,7 @@ String Sensors::readAllSensors(){
   dataString += " " + String(bmp.readTemperature());
   dataString += " " + String(getAlt());
   dataString += " " + String(getPressure());
- dataString += " " + String(getAscentRate());
+  dataString += " " + String(getAscentRate());
   dataString += " " + String(getOrientationX());
   dataString += " " + String(getOrientationY());
   dataString += " " + String(getOrientationZ());

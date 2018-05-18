@@ -1,5 +1,6 @@
 #include "Avionics.h"
 
+bool trig;
 
 void Avionics::initialize(){
   Serial.begin(9600);
@@ -10,6 +11,7 @@ void Avionics::initialize(){
   pinMode(WIRE, OUTPUT);
   digitalWrite(WIRE,LOW); //NICHROME WIRE SHOULD BE OFF FIRST
   //receiver.initializeReceiver();
+  trig = false;
 
 }
 
@@ -21,15 +23,21 @@ void Avionics::record(){
 
 void Avionics::cutdown(){
 
-  if(sensors.getAlt() > CUTDOWN_ALT ){
+  if(!trig && (sensors.getAlt() > CUTDOWN_ALT)
+   && (release == false)){
+  //if(sensors.getAlt() > CUTDOWN_ALT ){
     release = true;
     applyheat = millis();
+    Serial.println("START CUTDOWN");
     digitalWrite(WIRE,HIGH); //turn on nichrome
+    trig = true;
   }
 
   if(release){
     if(millis() - applyheat > RELEASE_TIME * 1000){
       digitalWrite(WIRE,LOW); //turn off nichrome wire
+      Serial.println("END CUTDOWN");
+
       release = false;
     }
   }

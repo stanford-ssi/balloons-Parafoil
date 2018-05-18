@@ -13,7 +13,7 @@ int main(void){
   avionics.initialize();
   while(true){
     avionics.record();
-  //  avionics.cutdown();
+    avionics.cutdown();
   }
 
   return 0;
