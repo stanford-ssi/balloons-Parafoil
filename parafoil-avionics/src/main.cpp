@@ -14,6 +14,7 @@ int main(void){
   while(true){
     avionics.record();
     avionics.cutdown();
+    avionics.smartSleep(50);
   }
 
   return 0;

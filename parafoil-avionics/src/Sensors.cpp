@@ -111,36 +111,27 @@ void Sensors::flashLED(){
 }
 
 double Sensors::getLat(){
-  double latitude = 0.0;
-  if(Serial1.available()){
-    char data = Serial1.read();
-    if(gps.encode(data)){
-      latitude = gps.location.lat();
-    }
-  }
+  double latitude = gps.location.lat();
   return latitude;
 }
 
 double Sensors::getLon(){
-  double longitude = 0.0;
-  if(Serial1.available()){
-    char data = Serial1.read();
-    if(gps.encode(data)){
-      longitude = gps.location.lng();
-    }
-  }
+  double longitude = gps.location.lng();
   return longitude;
 }
 
 uint8_t Sensors::getSats(){
   uint8_t sats = -1;
-  if(Serial1.available()){
-    char data = Serial1.read();
-    if(gps.encode(data)){
-      sats = gps.satellites.value();
-    }
-  }
   return sats;
+}
+
+void Sensors::smartDelay(unsigned long ms) {
+  unsigned long start = millis();
+  do
+  {
+    while (Serial3.available())
+      gps.encode(Serial3.read());
+  } while (millis() - start < ms);
 }
 
 String Sensors::readAllSensors(){

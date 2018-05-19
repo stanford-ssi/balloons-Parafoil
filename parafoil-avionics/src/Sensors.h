@@ -42,6 +42,7 @@ public:
   double getLon();
   double getSpeed();
   uint8_t getSats();
+  void smartDelay(unsigned long ms);
 
 private:
  long lastAscentTime;             // Time of last ascent rate calculation

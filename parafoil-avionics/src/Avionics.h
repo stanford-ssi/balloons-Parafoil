@@ -13,6 +13,7 @@ public:
   void record();
   void actuate(volatile int aileronPWM, long startTime, volatile boolean newSignal);
   void cutdown();
+  void smartSleep(unsigned long ms);
 
 private:
 

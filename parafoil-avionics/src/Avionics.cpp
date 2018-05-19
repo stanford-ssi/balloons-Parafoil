@@ -24,7 +24,7 @@ void Avionics::record(){
 
 void Avionics::cutdown(){
 
-  if(!trig && ( millis() > (30000) ) && (release == false) ){
+  if(!trig && ( sensors.getAlt() > CUTDOWN_ALT ) && (release == false) ){
     digitalWrite(WIRE,HIGH); //turn on nichrome
     release = true;
     applyheat = millis();
@@ -47,4 +47,10 @@ void Avionics::cutdown(){
 
 void Avionics::actuate(volatile int aileronPWM, long startTime, volatile boolean newSignal){
   receiver.moveServo(aileronPWM, startTime, newSignal);
+}
+
+
+
+void Avionics::smartSleep(unsigned long ms) {
+  sensors.smartDelay(ms);
 }
