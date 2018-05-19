@@ -157,8 +157,8 @@ String Sensors::readAllSensors(){
   dataString += " " + String(getOrientationX());
   dataString += " " + String(getOrientationY());
   dataString += " " + String(getOrientationZ());
-  dataString += " " + String(getLat());
-  dataString += " " + String(getLon());
+  dataString += " " + String(getLat(),6);
+  dataString += " " + String(getLon(),6);
   dataString += " " + String(getSats());
   Serial.println(dataString);
   return dataString;

@@ -25,20 +25,20 @@ void Avionics::record(){
 void Avionics::cutdown(){
 
   if(!trig && ( millis() > (30000) ) && (release == false) ){
-    pinMode(WIRE, INPUT_PULLUP); //turn on nichrome
+    digitalWrite(WIRE,HIGH); //turn on nichrome
     release = true;
     applyheat = millis();
     Serial.println("START CUTDOWN");
-    digitalWrite(LED_PIN, LOW);
+    digitalWrite(LED_PIN, HIGH);
     trig = true;
   }
 
   if(release){
     if(millis() - applyheat > RELEASE_TIME * 1000){
-      pinMode(WIRE,OUTPUT); //turn off nichrome wire
+      // pinMode(WIRE,OUTPUT); //turn off nichrome wire
       digitalWrite(WIRE,LOW);
       Serial.println("END CUTDOWN");
-      digitalWrite(LED_PIN, HIGH);
+      digitalWrite(LED_PIN, LOW);
       release = false;
     }
   }
