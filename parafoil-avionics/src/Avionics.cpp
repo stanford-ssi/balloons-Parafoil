@@ -7,6 +7,7 @@ void Avionics::initialize(){
   delay(5000);
   sensors.initializeSensors();
   sdcard.initializeSD(sensors);
+  digitalWrite(LED_PIN,LOW);
 
   pinMode(WIRE,OUTPUT);
   digitalWrite(WIRE,LOW);
@@ -23,22 +24,21 @@ void Avionics::record(){
 
 void Avionics::cutdown(){
 
-  if(!trig && ( sensors.getAlt() > CUTDOWN_ALT ) && (release == false) ){
+  if(!trig && ( millis() > (30000) ) && (release == false) ){
     pinMode(WIRE, INPUT_PULLUP); //turn on nichrome
     release = true;
     applyheat = millis();
     Serial.println("START CUTDOWN");
+    digitalWrite(LED_PIN, LOW);
     trig = true;
   }
 
   if(release){
     if(millis() - applyheat > RELEASE_TIME * 1000){
-
       pinMode(WIRE,OUTPUT); //turn off nichrome wire
       digitalWrite(WIRE,LOW);
-
       Serial.println("END CUTDOWN");
-
+      digitalWrite(LED_PIN, HIGH);
       release = false;
     }
   }

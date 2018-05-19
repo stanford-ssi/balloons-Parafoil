@@ -36,7 +36,7 @@ const static uint8_t SD_READER_CS = 20;
 /***********************CUTDOWN***************************/
 const static int CUTDOWN_ALT = 152; //equivalent ot 500ft
 const static uint8_t WIRE = 14;
-const static uint8_t RELEASE_TIME = 10; //10 sec release time
+const static uint8_t RELEASE_TIME = 3; //3 sec release time
 
 const static uint8_t AILERON_IN = 6; // INTERRUPT 2 = DIGITAL PIN 2 - use the interrupt number in attachInterrupt
 
