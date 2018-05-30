@@ -3,7 +3,7 @@
 
 #include "Sensors.h"
 #include "Log.h"
-#include "Receiver.h"
+#include "Motor.h"
 #include "Constants.h"
 
 class Avionics {
@@ -21,7 +21,6 @@ private:
   long applyheat = 0;
   /********************OBJECTS*************************/
   Sensors sensors;
-  Receiver receiver;
   Log sdcard;
 };
 

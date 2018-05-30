@@ -125,6 +125,16 @@ uint8_t Sensors::getSats(){
   return sats;
 }
 
+double Sensors::getSpeed(){
+  double mps = gps.speed.mps();
+  return mps;
+}
+
+double Sensors::getGPSAlt(){
+  double altitude = gps.altitude.meters();
+  return altitude;
+}
+
 void Sensors::smartDelay(unsigned long ms) {
   unsigned long start = millis();
   do
@@ -144,12 +154,13 @@ String Sensors::readAllSensors(){
   dataString += " " + String(bmp.readTemperature());
   dataString += " " + String(getAlt());
   dataString += " " + String(getPressure());
-  dataString += " " + String(getAscentRate());
   dataString += " " + String(getOrientationX());
   dataString += " " + String(getOrientationY());
   dataString += " " + String(getOrientationZ());
   dataString += " " + String(getLat(),6);
   dataString += " " + String(getLon(),6);
+  dataString += " " + String(getSpeed());
+  dataString += " " + String(getGPSAlt());
   dataString += " " + String(getSats());
   Serial.println(dataString);
   return dataString;

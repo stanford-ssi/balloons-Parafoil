@@ -34,16 +34,24 @@ const static uint8_t SD_READER_CS = 20;
 /************************GPS*****************************/
 
 /***********************CUTDOWN***************************/
-const static int CUTDOWN_ALT = 152; //equivalent ot 500ft
+const static int CUTDOWN_ALT = 300; //equivalent ot 500ft
 const static uint8_t WIRE = 14;
 const static uint8_t RELEASE_TIME = 3; //3 sec release time
 
-const static uint8_t AILERON_IN = 6; // INTERRUPT 2 = DIGITAL PIN 2 - use the interrupt number in attachInterrupt
+/*********************MOTORS*****************************/
+const static uint8_t MOTOR_A_DIR_1 = 1;
+const static uint8_t MOTOR_A_DIR_2 = 2;
+const static uint8_t MOTOR_B_DIR_1 = 1;
+const static uint8_t MOTOR_B_DIR_2 = 2;
+
+const static uint8_t MOTOR_A_SPEED = 2;
+const static uint8_t MOTOR_B_SPEED = 1;
 
 
-const static uint16_t  MIN_AILERON = 1000; //minimum PWM on aileron stick
-const static uint16_t NEUTRAL_AILERON = 1500; // neutral PWM on the aileron stick
-const static uint16_t  MAX_AILERON = 2000;  //maximum PWM on aileron stick
 
+const static uint8_t ENCODER_A_1 = 1;
+const static uint8_t ENCODER_A_2 = 2;
+const static uint8_t ENCODER_B_1 = 3;
+const static uint8_t ENCODER_B_2 = 4;
 
 #endif

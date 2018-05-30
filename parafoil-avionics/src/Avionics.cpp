@@ -45,12 +45,6 @@ void Avionics::cutdown(){
 }
 
 
-void Avionics::actuate(volatile int aileronPWM, long startTime, volatile boolean newSignal){
-  receiver.moveServo(aileronPWM, startTime, newSignal);
-}
-
-
-
 void Avionics::smartSleep(unsigned long ms) {
   sensors.smartDelay(ms);
 }

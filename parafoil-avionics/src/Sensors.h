@@ -41,6 +41,7 @@ public:
   double getLat();
   double getLon();
   double getSpeed();
+  double getGPSAlt();
   uint8_t getSats();
   void smartDelay(unsigned long ms);
 

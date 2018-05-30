@@ -1,6 +1,6 @@
 #include "Avionics.h"
 #include "Log.h"
-#include "Receiver.h"
+#include "Motor.h"
 #include "Sensors.h"
 #include "Constants.h"
 
@@ -9,8 +9,8 @@
 int main(void){
 
   Avionics avionics;
-
   avionics.initialize();
+  
   while(true){
     avionics.record();
     avionics.cutdown();

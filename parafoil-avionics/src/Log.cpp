@@ -26,8 +26,8 @@ bool Log::initializeSD(Sensors& sensors){
   else{
     dataFile = SD.open("datalog.txt", FILE_WRITE);
     Serial.println("SD card intialized.");
-    dataFile.print("Time(ms), Pressure(Pa), Alt(m), AscentRate(m/s), TempIn(C), OrientationX(deg), y(deg) , z(deg), ");
-    dataFile.println("GPSLat, GPSLong, GPSSats, RBSigalQuality");
+    dataFile.print("Time(ms), TempIn(C), Alt(m), Pressure(Pa), OrientationX(deg), y(deg) , z(deg), ");
+    dataFile.println("GPSLat, GPSLong, GPSSats, Speed(mps), Satellites");
     dataFile.close();
   }
 
