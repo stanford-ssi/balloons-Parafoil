@@ -2,13 +2,16 @@
 
 bool trig;
 
-void Avionics::initialize(){
+void Avionics::initialize(Encoder& EncA, Encoder& EncB){
   Serial.begin(9600);
   delay(5000);
   sensors.initializeSensors();
   sdcard.initializeSD(sensors);
-  digitalWrite(LED_PIN,LOW);
 
+  EncA.write(NEUTRAL);
+  EncB.write(NEUTRAL);
+
+  digitalWrite(LED_PIN,LOW);
   pinMode(WIRE,OUTPUT);
   digitalWrite(WIRE,LOW);
   //receiver.initializeReceiver();
@@ -17,7 +20,6 @@ void Avionics::initialize(){
 }
 
 void Avionics::record(){
-
   //sensors.readAllSensors();
   sdcard.writeSD(sensors);
 }
@@ -44,6 +46,9 @@ void Avionics::cutdown(){
   }
 }
 
+void Avionics::fly(Encoder& EncA, Encoder& EncB){
+   motors.performScriptedFlight(EncA,EncB);
+}
 
 void Avionics::smartSleep(unsigned long ms) {
   sensors.smartDelay(ms);

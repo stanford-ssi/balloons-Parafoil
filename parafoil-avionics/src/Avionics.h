@@ -9,10 +9,10 @@
 class Avionics {
 
 public:
-  void initialize();
+  void initialize(Encoder& EncA, Encoder& EncB);
   void record();
-  void actuate(volatile int aileronPWM, long startTime, volatile boolean newSignal);
   void cutdown();
+  void fly(Encoder& EncA, Encoder& EncB);
   void smartSleep(unsigned long ms);
 
 private:
@@ -22,6 +22,7 @@ private:
   /********************OBJECTS*************************/
   Sensors sensors;
   Log sdcard;
+  Motor motors;
 };
 
 #endif

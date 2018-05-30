@@ -9,11 +9,15 @@
 int main(void){
 
   Avionics avionics;
-  avionics.initialize();
-  
+  Encoder EncA(ENCODER_A_1, ENCODER_A_2);
+  Encoder EncB(ENCODER_B_1, ENCODER_B_2);
+
+  avionics.initialize(EncA, EncB);
+
   while(true){
     avionics.record();
     avionics.cutdown();
+    avionics.fly(EncA, EncB);
     avionics.smartSleep(50);
   }
 

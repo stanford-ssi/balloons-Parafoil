@@ -38,7 +38,12 @@ const static int CUTDOWN_ALT = 300; //equivalent ot 500ft
 const static uint8_t WIRE = 14;
 const static uint8_t RELEASE_TIME = 3; //3 sec release time
 
+
+
+
 /*********************MOTORS*****************************/
+const static int SETPOINT_MARGIN_RADIUS = 10;
+
 const static uint8_t MOTOR_A_DIR_1 = 1;
 const static uint8_t MOTOR_A_DIR_2 = 2;
 const static uint8_t MOTOR_B_DIR_1 = 1;
@@ -47,11 +52,19 @@ const static uint8_t MOTOR_B_DIR_2 = 2;
 const static uint8_t MOTOR_A_SPEED = 2;
 const static uint8_t MOTOR_B_SPEED = 1;
 
+const static int ENCODER_A_1 = 5;
+const static int ENCODER_A_2 = 6;
+const static int ENCODER_B_1 = 7;
+const static int ENCODER_B_2 = 8;
 
+const static int MIN_MOTOR = -4000;
+const static int MAX_MOTOR = 4000;
+const static int NEUTRAL = 0;
 
-const static uint8_t ENCODER_A_1 = 1;
-const static uint8_t ENCODER_A_2 = 2;
-const static uint8_t ENCODER_B_1 = 3;
-const static uint8_t ENCODER_B_2 = 4;
+/************FLIGHT PATH********************/
+
+const static int BANK_LEFT_TIME = 30000;
+const static int BANK_RIGHT_TIME = 30000;
+const static int FORWARD_FLIGHT_TIME = 10000;
 
 #endif
