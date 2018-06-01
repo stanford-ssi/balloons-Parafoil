@@ -17,6 +17,7 @@ int main(void){
   while(true){
     avionics.record();
     avionics.cutdown();
+    Serial.println("break before fly");
     avionics.fly(EncA, EncB);
     avionics.smartSleep(50);
   }

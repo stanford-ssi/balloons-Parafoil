@@ -48,6 +48,7 @@ void Avionics::cutdown(){
 }
 
 void Avionics::fly(Encoder& EncA, Encoder& EncB){
+    Serial.println("break in fly");
    motors.performScriptedFlight(EncA,EncB);
 }
 

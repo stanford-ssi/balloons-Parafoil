@@ -15,14 +15,14 @@ public:
   void performScriptedFlight(Encoder& EncA, Encoder& EncB);
   int comparePositions(long currentPos, long setPoint) ;
   void forwardFlight(long loopTime, long currentPosA, long currentPosB);
-  void bankLeft(long loopTime, long currentPosA);
-  void bankRight(long loopTime, long currentPosB);
+  void bankLeft(long currentPosA);
+  void bankRight(long currentPosB);
 
 private:
 
 
 
-  int counter = 0;
+  int counter = 1;
 
 };
 

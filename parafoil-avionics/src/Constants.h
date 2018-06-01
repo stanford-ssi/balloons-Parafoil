@@ -19,7 +19,7 @@
 
 
 //BMP
-const static float LAUNCH_SITE_PRESSURE = 1014.562;
+const static float LAUNCH_SITE_PRESSURE = 100744.95;
 const static int BAROMETER_MEASURMENT_INTERVAL = 10000;
 
 
@@ -42,10 +42,10 @@ const static uint8_t RELEASE_TIME = 3; //3 sec release time
 
 
 /*********************MOTORS*****************************/
-const static int SETPOINT_MARGIN_RADIUS = 10;
+const static int SETPOINT_MARGIN_RADIUS = 3000;
 
 const static uint8_t MOTOR_A_DIR_1 = 0;
-const static uint8_t MOTOR_A_DIR_2 = 1;
+const static uint8_t MOTOR_A_DIR_2 = 16;
 const static uint8_t MOTOR_B_DIR_1 = 2;
 const static uint8_t MOTOR_B_DIR_2 = 3;
 
@@ -58,13 +58,13 @@ const static int ENCODER_B_1 = 9;
 const static int ENCODER_B_2 = 10;
 
 const static int MIN_MOTOR = -10000;
-const static int MAX_MOTOR = 4000;
+const static int MAX_MOTOR = 10000;
 const static int NEUTRAL = 0;
 
 /************FLIGHT PATH********************/
 
 const static int BANK_LEFT_TIME = 30000;
 const static int BANK_RIGHT_TIME = 30000;
-const static int FORWARD_FLIGHT_TIME = 10000;
+const static int FORWARD_FLIGHT_TIME = 30000;
 
 #endif

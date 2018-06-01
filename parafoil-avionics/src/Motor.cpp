@@ -34,9 +34,9 @@ void Motor::setDirection(Direction dir) { //tells method to go cw or ccw.  cw an
     case CCW:
       Serial.println("Counter-Clockwise");
       digitalWrite(MOTOR_A_DIR_1, LOW);
-      digitalWrite(MOTOR_A_DIR_2, LOW);
+      digitalWrite(MOTOR_A_DIR_2, HIGH);
 
-      digitalWrite(MOTOR_B_DIR_1, HIGH);
+      digitalWrite(MOTOR_B_DIR_1, LOW);
       digitalWrite(MOTOR_B_DIR_2, LOW);
       break;
     default:
@@ -52,7 +52,7 @@ void Motor::setDirection(Direction dir) { //tells method to go cw or ccw.  cw an
 
 
 void Motor::performScriptedFlight(Encoder& EncA, Encoder& EncB){
-
+  Serial.println("break in scripted flight");
   //Print current positions
   long currentPosA = EncA.read();
   long currentPosB = EncB.read();
@@ -60,33 +60,61 @@ void Motor::performScriptedFlight(Encoder& EncA, Encoder& EncB){
   Serial.println(currentPosA);
   Serial.print("EncB position: ");
   Serial.println(currentPosB);
-
-  long loopTime = millis();
-
-  if(loopTime - (counter * FORWARD_FLIGHT_TIME) < 0){
-    Serial.println("FLY FORWARD");
-    forwardFlight(loopTime, currentPosA, currentPosB);
-    return;
+    long loopTime = millis();
+  if( loopTime < 30000){
+    setDirection(CW);
   }
 
-  else if(loopTime - (counter * BANK_LEFT_TIME) < 0){
-    Serial.println("BANK LEFT");
-    bankLeft(loopTime, currentPosA);
-    return;
-  }
+  if( loopTime > 30000){
+    Serial.println("LOOP");
+    Serial.println(currentPosA);
+      Serial.println("break in correction");
+    int cmp = comparePositions(currentPosA, 0);
+    if (cmp == 0) { // position within margins => dont move
+        setDirection(NEUTRAL);
+        return;
+      } else { // need to move
+        if (cmp > 0) { // forward
+          setDirection(CCW);
+        } else { // cmp < 0 => backward
+          setDirection(CW);
+        }
+      }
 
-  else if(loopTime - (counter * FORWARD_FLIGHT_TIME) < 0){
-    Serial.println("FLY FORWARD");
-    forwardFlight(loopTime,currentPosA, currentPosB);
-    return;
   }
+  // else if( loopTime < (1 * 60000))
+  //   setDirection(NEUTRAL);
+  // }
+  // else{
+  //
+  // }
 
-  else if(loopTime - (counter * BANK_RIGHT_TIME) < 0){
-    Serial.println("BANK RIGHT");
-    bankRight(loopTime, currentPosB);
-    return;
-  }
-  counter++;
+//   bankLeft(currentPosA);
+  //
+  // if(loopTime - (counter * FORWARD_FLIGHT_TIME) < 0){
+  //   Serial.println("FLY FORWARD");
+  //   forwardFlight(loopTime, currentPosA, currentPosB);
+  //   return;
+  // }
+  //
+  // else if(loopTime - (counter * BANK_LEFT_TIME) < 0){
+  //   Serial.println("BANK LEFT");
+  //   bankLeft(loopTime, currentPosA);
+  //   return;
+  // }
+  //
+  // else if(loopTime - (counter * FORWARD_FLIGHT_TIME) < 0){
+  //   Serial.println("FLY FORWARD");
+  //   forwardFlight(loopTime,currentPosA, currentPosB);
+  //   return;
+  // }
+  //
+  // else if(loopTime - (counter * BANK_RIGHT_TIME) < 0){
+  //   Serial.println("BANK RIGHT");
+  //   bankRight(loopTime, currentPosB);
+  //   return;
+  // }
+
   return;
 }
 
@@ -95,14 +123,19 @@ int Motor::comparePositions(long currentPos, long setPoint) {
   analogWrite(MOTOR_A_SPEED, 100);
   analogWrite(MOTOR_B_SPEED, 100);
   int diff = setPoint - currentPos;
+  Serial.print("Difference: ");
+  Serial.println(diff);
   if (abs(diff) < SETPOINT_MARGIN_RADIUS) {
-    setDirection(NEUTRAL);
+    Serial.println("Found position and hold");
+  //  setDirection(NEUTRAL);
     return 0;
-  } else if (diff < 0) {
-    setDirection(CCW);
+  } else if (diff > 0) {
+    Serial.println("Keep going");
+    //setDirection(CW);
     return -1;
-  } else { // diff > 0
-    setDirection(CW);
+  } else { // diff < 0
+    Serial.println("Keep going");
+    //setDirection(CCW);
     return 1;
   }
 }
@@ -112,10 +145,10 @@ void Motor::forwardFlight(long loopTime, long currentPosA, long currentPosB){
     comparePositions(currentPosB, NEUTRAL);
 }
 
-void Motor::bankLeft(long loopTime, long currentPosA){
+void Motor::bankLeft(long currentPosA){
     comparePositions(currentPosA, MAX_MOTOR);
 }
 
-void Motor::bankRight(long loopTime, long currentPosB){
+void Motor::bankRight(long currentPosB){
     comparePositions(currentPosB, MAX_MOTOR);
 }
