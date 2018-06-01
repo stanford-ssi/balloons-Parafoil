@@ -1,7 +1,7 @@
 #include "Motor.h"
 
 void Motor::initializeMotors(){
-  Serial.println("Initliatizing motors and encoders");
+  Serial.println("Initliatizing motors pins and setDirection");
   pinMode(MOTOR_A_DIR_1, OUTPUT);
   pinMode(MOTOR_A_DIR_2, OUTPUT);
   pinMode(MOTOR_A_SPEED, OUTPUT);
@@ -92,8 +92,8 @@ void Motor::performScriptedFlight(Encoder& EncA, Encoder& EncB){
 
 //compares current position of either motor A and B and specifies direction
 int Motor::comparePositions(long currentPos, long setPoint) {
-  analogWrite(MOTOR_A_SPEED, 255);
-  analogWrite(MOTOR_B_SPEED, 255);
+  analogWrite(MOTOR_A_SPEED, 100);
+  analogWrite(MOTOR_B_SPEED, 100);
   int diff = setPoint - currentPos;
   if (abs(diff) < SETPOINT_MARGIN_RADIUS) {
     setDirection(NEUTRAL);

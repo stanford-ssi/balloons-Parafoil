@@ -7,6 +7,7 @@ void Avionics::initialize(Encoder& EncA, Encoder& EncB){
   delay(5000);
   sensors.initializeSensors();
   sdcard.initializeSD(sensors);
+  motors.initializeMotors();
 
   EncA.write(NEUTRAL);
   EncB.write(NEUTRAL);

@@ -162,6 +162,7 @@ String Sensors::readAllSensors(){
   dataString += " " + String(getSpeed());
   dataString += " " + String(getGPSAlt());
   dataString += " " + String(getSats());
+  
   Serial.println(dataString);
   return dataString;
 }

@@ -44,20 +44,20 @@ const static uint8_t RELEASE_TIME = 3; //3 sec release time
 /*********************MOTORS*****************************/
 const static int SETPOINT_MARGIN_RADIUS = 10;
 
-const static uint8_t MOTOR_A_DIR_1 = 1;
-const static uint8_t MOTOR_A_DIR_2 = 2;
-const static uint8_t MOTOR_B_DIR_1 = 1;
-const static uint8_t MOTOR_B_DIR_2 = 2;
+const static uint8_t MOTOR_A_DIR_1 = 0;
+const static uint8_t MOTOR_A_DIR_2 = 1;
+const static uint8_t MOTOR_B_DIR_1 = 2;
+const static uint8_t MOTOR_B_DIR_2 = 3;
 
-const static uint8_t MOTOR_A_SPEED = 2;
-const static uint8_t MOTOR_B_SPEED = 1;
+const static uint8_t MOTOR_A_SPEED = 21;
+const static uint8_t MOTOR_B_SPEED = 20;
 
-const static int ENCODER_A_1 = 5;
-const static int ENCODER_A_2 = 6;
-const static int ENCODER_B_1 = 7;
-const static int ENCODER_B_2 = 8;
+const static int ENCODER_A_1 = 4;
+const static int ENCODER_A_2 = 5;
+const static int ENCODER_B_1 = 9;
+const static int ENCODER_B_2 = 10;
 
-const static int MIN_MOTOR = -4000;
+const static int MIN_MOTOR = -10000;
 const static int MAX_MOTOR = 4000;
 const static int NEUTRAL = 0;
 
