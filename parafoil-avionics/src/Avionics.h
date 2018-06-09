@@ -9,11 +9,14 @@
 class Avionics {
 
 public:
-  void initialize(Encoder& EncA, Encoder& EncB);
+  void initialize(Encoder* EncA, Encoder* EncB);
   void record();
   void cutdown();
-  void fly(Encoder& EncA, Encoder& EncB);
+  void fly();
   void smartSleep(unsigned long ms);
+
+    Encoder* EncA;
+  Encoder* EncB;
 
 private:
 

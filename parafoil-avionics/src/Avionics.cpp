@@ -2,15 +2,20 @@
 
 bool trig;
 
-void Avionics::initialize(Encoder& EncA, Encoder& EncB){
+void Avionics::initialize(Encoder* _EncA, Encoder* _EncB){
+
+
+  EncA = _EncA;
+  EncB = _EncB;
+
   Serial.begin(9600);
   delay(5000);
   sensors.initializeSensors();
   sdcard.initializeSD(sensors);
-  motors.initializeMotors();
+  motors.initializeMotors(EncA, EncB);
 
-  EncA.write(NEUTRAL);
-  EncB.write(NEUTRAL);
+  EncA->write(NEUTRAL);
+  EncB->write(NEUTRAL);
 
   digitalWrite(LED_PIN,LOW);
   pinMode(WIRE,OUTPUT);
@@ -47,9 +52,53 @@ void Avionics::cutdown(){
   }
 }
 
-void Avionics::fly(Encoder& EncA, Encoder& EncB){
-    Serial.println("break in fly");
-   motors.performScriptedFlight(EncA,EncB);
+void Avionics::fly(){
+    /* Serial.println("break in fly"); */
+	
+
+
+	Serial.print("A: ");
+	Serial.print(EncA->read() );
+	Serial.print(" B: ");
+	Serial.println(EncB->read() );
+	
+
+	motors.set_A_position(10000);
+	while ( (motors.A_dir != NEUTRAL) && (motors.B_dir != NEUTRAL) ){
+	Serial.print("A: ");
+	Serial.print(EncA->read() );
+	Serial.print(" B: ");
+	Serial.println(EncB->read() );
+	}
+
+	motors.set_B_position(10000);
+	while ( (motors.A_dir != NEUTRAL) && (motors.B_dir != NEUTRAL) ){
+	Serial.print("A: ");
+	Serial.print(EncA->read() );
+	Serial.print(" B: ");
+	Serial.println(EncB->read() );
+	}
+
+
+	motors.set_A_position(0);
+	while ( (motors.A_dir != NEUTRAL) && (motors.B_dir != NEUTRAL) ){
+	Serial.print("A: ");
+	Serial.print(EncA->read() );
+	Serial.print(" B: ");
+	Serial.println(EncB->read() );
+	}
+
+	motors.set_B_position(0);
+	while ( (motors.A_dir != NEUTRAL) && (motors.B_dir != NEUTRAL) ){
+	Serial.print("A: ");
+	Serial.print(EncA->read() );
+	Serial.print(" B: ");
+	Serial.println(EncB->read() );
+	}
+
+
+
+   /* motors.performScriptedFlight(EncA,EncB); */
 }
 
 void Avionics::smartSleep(unsigned long ms) {
