@@ -2,24 +2,25 @@
 
 bool trig;
 
-void Avionics::initialize(Encoder* _EncA, Encoder* _EncB){
+Encoder EncA(ENCODER_A_1, ENCODER_A_2);
+Encoder EncB(ENCODER_B_1, ENCODER_B_2);
 
+void Avionics::initialize(){
 
-  EncA = _EncA;
-  EncB = _EncB;
 
   Serial.begin(9600);
   delay(5000);
   sensors.initializeSensors();
   sdcard.initializeSD(sensors);
-  motors.initializeMotors(EncA, EncB);
 
-  EncA->write(NEUTRAL);
-  EncB->write(NEUTRAL);
+  motorA.initialize(EncA, MOTOR_A_DIR_1, MOTOR_A_DIR_2, MOTOR_A_SPEED);
+  motorB.initialize(EncB, MOTOR_B_DIR_1, MOTOR_B_DIR_2, MOTOR_B_SPEED);
+
 
   digitalWrite(LED_PIN,LOW);
   pinMode(WIRE,OUTPUT);
   digitalWrite(WIRE,LOW);
+
   //receiver.initializeReceiver();
   trig = false;
 
@@ -58,47 +59,47 @@ void Avionics::fly(){
 
 
 	Serial.print("A: ");
-	Serial.print(EncA->read() );
+	Serial.print(motorA.EncA->read() );
 	Serial.print(" B: ");
-	Serial.println(EncB->read() );
+	Serial.println(motorB.Enc->read() );
 	
 
 	motors.set_A_position(10000);
-	while ( (motors.A_dir != NEUTRAL) && (motors.B_dir != NEUTRAL) ){
+	while (! motorA.update() ){
 	Serial.print("A: ");
-	Serial.print(EncA->read() );
+	Serial.print(motorA.EncA->read() );
 	Serial.print(" B: ");
-	Serial.println(EncB->read() );
+	Serial.println(motorB.Enc->read() );
 	}
 
 	motors.set_B_position(10000);
-	while ( (motors.A_dir != NEUTRAL) && (motors.B_dir != NEUTRAL) ){
+	while (! motorB.update() ){
 	Serial.print("A: ");
-	Serial.print(EncA->read() );
+	Serial.print(motorA.EncA->read() );
 	Serial.print(" B: ");
-	Serial.println(EncB->read() );
+	Serial.println(motorB.Enc->read() );
 	}
 
 
 	motors.set_A_position(0);
-	while ( (motors.A_dir != NEUTRAL) && (motors.B_dir != NEUTRAL) ){
+	while (! motorA.update() ){
 	Serial.print("A: ");
-	Serial.print(EncA->read() );
+	Serial.print(motorA.EncA->read() );
 	Serial.print(" B: ");
-	Serial.println(EncB->read() );
+	Serial.println(motorB.Enc->read() );
 	}
 
 	motors.set_B_position(0);
-	while ( (motors.A_dir != NEUTRAL) && (motors.B_dir != NEUTRAL) ){
+	while (! motorB.update() ){
 	Serial.print("A: ");
-	Serial.print(EncA->read() );
+	Serial.print(motorA.EncA->read() );
 	Serial.print(" B: ");
-	Serial.println(EncB->read() );
+	Serial.println(motorB.Enc->read() );
 	}
 
 
 
-   /* motors.performScriptedFlight(EncA,EncB); */
+   /* motors.performScriptedFlight(motorA.EncA,motorB.Enc); */
 }
 
 void Avionics::smartSleep(unsigned long ms) {

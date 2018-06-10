@@ -8,12 +8,10 @@ class Motor{
 
 public:
   enum Direction { CW, NEUTRAL, CCW };
-  Direction dir;
 
-  void initializeMotors( Encoder* EncA, Encoder* EncB);
-  void set_A_position(int pos);
-  void set_B_position(int pos);
-  void update();
+  void initialize(Encoder* Enc, int dir1_pin, int dir2_pin, int speed_pin);
+  void set_position(int pos);
+  int update();
 
   void setDirection(Direction dir);
   void performScriptedFlight(Encoder& EncA, Encoder& EncB);
@@ -22,19 +20,16 @@ public:
   void bankLeft(long currentPosA);
   void bankRight(long currentPosB);
 
-  Direction A_dir;
-  Direction B_dir;
-
-
-  Encoder* EncA;
-  Encoder* EncB;
-
+  Encoder* Enc;
+  int speed;
 private:
 
+  Direction dir;
+  int target = 0;
 
-  int A_target = 0;
-  int B_target = 0;
-
+  int dir1_pin;
+  int dir2_pin;
+  int speed_pin;
 
 
   int counter = 1;

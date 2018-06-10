@@ -15,8 +15,6 @@ public:
   void fly();
   void smartSleep(unsigned long ms);
 
-    Encoder* EncA;
-  Encoder* EncB;
 
 private:
 
@@ -25,7 +23,9 @@ private:
   /********************OBJECTS*************************/
   Sensors sensors;
   Log sdcard;
-  Motor motors;
+
+  Motor motorA;
+  Motor motorB;
 };
 
 #endif
