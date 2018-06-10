@@ -9,7 +9,7 @@
 class Avionics {
 
 public:
-  void initialize(Encoder* EncA, Encoder* EncB);
+  void initialize();
   void record();
   void cutdown();
   void fly();

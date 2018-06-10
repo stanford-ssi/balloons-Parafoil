@@ -12,22 +12,8 @@ int main(void){
   Encoder EncA(ENCODER_A_1, ENCODER_A_2);
   Encoder EncB(ENCODER_B_1, ENCODER_B_2);
 
-  avionics.initialize(&EncA, &EncB);
+  avionics.initialize();
 
-
-  /* avionics.motors.setDirection(avionics.motors.CCW); */
-
-  /* digitalWrite(MOTOR_A_DIR_1, HIGH); */
-  /* digitalWrite(MOTOR_A_DIR_2, LOW); */
-
-  /* digitalWrite(MOTOR_B_DIR_1, LOW); */
-  /* digitalWrite(MOTOR_B_DIR_2, LOW); */
-
-  /* while(true){ */
-  /* analogWrite(MOTOR_A_SPEED, 100); */
-  /* Serial.print("position "); */
-  /* Serial.println(EncA.read()); */
-  /* } */
   
 
   while(true){
