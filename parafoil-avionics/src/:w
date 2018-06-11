@@ -3,17 +3,13 @@
 #define MOTOR_H
 
 #include "Constants.h"
-#include "Sensors.h"
 
 class Motor{
 
 public:
-
-  Motor(int enc1, int enc2):Enc(enc1,enc2) {} 
-
   enum Direction { CW, NEUTRAL, CCW };
 
-  void initialize(int dir1_pin, int dir2_pin, int speed_pin, int enc1_pin, int enc2_pin);
+  void initialize(Encoder* Enc, int dir1_pin, int dir2_pin, int speed_pin);
   void set_position(int pos);
   int update();
 

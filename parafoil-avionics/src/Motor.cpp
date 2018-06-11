@@ -1,8 +1,9 @@
 #include "Motor.h"
 
-void Motor::initialize(Encoder* Enc, int dir1_pin, int dir2_pin, int speed_pin){
+void Motor::initialize(int dir1_pin, int dir2_pin, int speed_pin, int enc1_pin, int enc2_pin){
 
-  this->Enc = Enc;
+  /* this->Enc = Encoder((uint8_t) enc1_pin, (uint8_t) enc2_pin); */
+
   this->dir1_pin = dir1_pin;
   this->dir2_pin = dir2_pin;
   this->speed_pin = speed_pin;
@@ -17,14 +18,14 @@ void Motor::initialize(Encoder* Enc, int dir1_pin, int dir2_pin, int speed_pin){
   this->speed = 100;
   this->target = 0;
   this->dir = NEUTRAL;
-  this->Enc->write(0);
+  this->Enc.write(0);
 }
 
 
 void Motor::set_position(int pos){
 	this->target = pos;
 
-	if( pos -  this->Enc->read() > 0){
+	if( pos -  this->Enc.read() > 0){
 		this->dir = CW;
 		digitalWrite(this->dir1_pin, LOW);
 		digitalWrite(this->dir2_pin, HIGH);
@@ -40,8 +41,8 @@ void Motor::set_position(int pos){
 
 int Motor::update(){
 	if( this->dir != NEUTRAL){
-		if( ( (this->dir ==  CW) && (this->Enc->read() > this->target)) ||
-		    ( (this->dir == CCW) && (this->Enc->read() < this->target)) ){
+		if( ( (this->dir ==  CW) && (this->Enc.read() > this->target)) ||
+		    ( (this->dir == CCW) && (this->Enc.read() < this->target)) ){
 			analogWrite(this->speed_pin, 0);
 			this->dir = NEUTRAL;
 			digitalWrite(this->dir1_pin, LOW);
