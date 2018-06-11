@@ -61,10 +61,23 @@ void Avionics::cutdown(){
   }
 }
 
+
+
+void Avionics::forwardFlight(){
+	motorA.set_position(0);
+	motorB.set_position(0);
+}
+void Avionics::bankLeft(){
+	motorA.set_position(10000);
+	motorB.set_position(0);
+}
+void Avionics::bankRight(){
+	motorA.set_position(0);
+	motorB.set_position(10000);
+}
+
 void Avionics::fly(){
     /* Serial.println("break in fly"); */
-	
-
 	
 
 	motorA.set_position(10000);

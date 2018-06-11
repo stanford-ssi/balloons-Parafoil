@@ -15,6 +15,10 @@ public:
   void fly();
   void smartSleep(unsigned long ms);
 
+  void forwardFlight();
+  void bankLeft();
+  void bankRight();
+  
 
 private:
   int inited = 0;
