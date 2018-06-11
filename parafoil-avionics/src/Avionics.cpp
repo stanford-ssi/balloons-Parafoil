@@ -66,14 +66,14 @@ void Avionics::smartSleep(unsigned long ms) {
   unsigned long start = millis();
   unsigned long lap = millis();
   do {
-	  /* sensors.gpsUpdate(); */
+	  sensors.gpsUpdate();
 	  motorA.update();
 	  motorB.update();
 
 	  if( (millis() - lap) > 50){
 		  lap = millis();
 		  Serial.println("new 20Hz loop");
-		  /* record(); */
+		  record();
 		  /* cutdown(); */
 
 		  Serial.print("A: ");
