@@ -1,13 +1,10 @@
 #include "Motor.h"
 
-void Motor::initialize(int dir1_pin, int dir2_pin, int speed_pin, int enc1_pin, int enc2_pin){
-
-  /* this->Enc = Encoder((uint8_t) enc1_pin, (uint8_t) enc2_pin); */
+Motor::Motor(int dir1_pin, int dir2_pin, int speed_pin, int enc1_pin, int enc2_pin):Enc(enc1_pin,enc2_pin){
 
   this->dir1_pin = dir1_pin;
   this->dir2_pin = dir2_pin;
   this->speed_pin = speed_pin;
-
   
   Serial.println("Initliatizing motor");
 
@@ -54,77 +51,3 @@ int Motor::update(){
 
 
 
-void Motor::setDirection(Direction dir) { //tells method to go cw or ccw.  cw and ccw will never both be false
-  switch (dir) {
-    case CW:
-      Serial.println("Clockwise");
-      digitalWrite(MOTOR_A_DIR_1, HIGH); //CHECK IF THIS SS THE CORRECT DIRECTION, OTHERWISE, CHANGE!
-      digitalWrite(MOTOR_A_DIR_2, LOW);
-
-      digitalWrite(MOTOR_B_DIR_1, LOW);
-      digitalWrite(MOTOR_B_DIR_2, LOW);
-      break;
-    case NEUTRAL:
-      Serial.println("Neutral");
-      digitalWrite(MOTOR_A_DIR_1, LOW);
-      digitalWrite(MOTOR_A_DIR_2, LOW);
-
-      digitalWrite(MOTOR_B_DIR_1, LOW);
-      digitalWrite(MOTOR_B_DIR_2, LOW);
-      break;
-    case CCW:
-      Serial.println("Counter-Clockwise");
-      digitalWrite(MOTOR_A_DIR_1, LOW);
-      digitalWrite(MOTOR_A_DIR_2, HIGH);
-
-      digitalWrite(MOTOR_B_DIR_1, LOW);
-      digitalWrite(MOTOR_B_DIR_2, LOW);
-      break;
-    default:
-      Serial.println("Illegal enum value");
-      digitalWrite(MOTOR_A_DIR_1, LOW);
-      digitalWrite(MOTOR_A_DIR_2, LOW);
-
-      digitalWrite(MOTOR_B_DIR_1, LOW);
-      digitalWrite(MOTOR_B_DIR_2, LOW);
-      break;
-  }
-}
-
-
-
-
-//compares current position of either motor A and B and specifies direction
-int Motor::comparePositions(long currentPos, long setPoint) {
-  analogWrite(MOTOR_A_SPEED, 100);
-  analogWrite(MOTOR_B_SPEED, 100);
-  int diff = setPoint - currentPos;
-  Serial.print("Difference: ");
-  Serial.println(diff);
-  if (abs(diff) < SETPOINT_MARGIN_RADIUS) {
-    Serial.println("Found position and hold");
-  //  setDirection(NEUTRAL);
-    return 0;
-  } else if (diff > 0) {
-    Serial.println("Keep going");
-    //setDirection(CW);
-    return -1;
-  } else { // diff < 0
-    Serial.println("Keep going");
-    //setDirection(CCW);
-    return 1;
-  }
-}
-
-void Motor::forwardFlight(long loopTime, long currentPosA, long currentPosB){
-    comparePositions(currentPosA, NEUTRAL);
-    comparePositions(currentPosB, NEUTRAL);
-}
-
-void Motor::bankLeft(long currentPosA){
-    comparePositions(currentPosA, MAX_MOTOR);
-}
-
-void Motor::bankRight(long currentPosB){
-    comparePositions(currentPosB, MAX_MOTOR);
-}

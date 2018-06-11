@@ -3,16 +3,13 @@
 bool trig;
 
 
-Avionics::Avionics(): motorA(ENCODER_A_1,ENCODER_A_2), motorB(ENCODER_B_1,ENCODER_B_2) { 
+Avionics::Avionics(): motorA(MOTOR_A_DIR_1, MOTOR_A_DIR_2, MOTOR_A_SPEED, ENCODER_A_1, ENCODER_A_2), 
+		      motorB(MOTOR_B_DIR_1, MOTOR_B_DIR_2, MOTOR_B_SPEED, ENCODER_B_1, ENCODER_B_2) { 
 
   Serial.begin(9600);
   delay(5000);
   sensors.initializeSensors();
   sdcard.initializeSD(sensors);
-
-  motorA.initialize(MOTOR_A_DIR_1, MOTOR_A_DIR_2, MOTOR_A_SPEED, ENCODER_A_1, ENCODER_A_2);
-  motorB.initialize(MOTOR_B_DIR_1, MOTOR_B_DIR_2, MOTOR_B_SPEED, ENCODER_B_1, ENCODER_B_2);
-
 
   digitalWrite(LED_PIN,LOW);
   pinMode(WIRE,OUTPUT);
@@ -51,47 +48,40 @@ void Avionics::cutdown(){
 }
 
 void Avionics::fly(){
-	
-
-	
 
 	motorA.set_position(10000);
-	while (! motorA.update() ){
-	Serial.print("1A: ");
-	Serial.print(motorA.Enc.read() );
-	Serial.print(" 1B: ");
-	Serial.println(motorB.Enc.read() );
-	}
+	smartSleep(5000);
 
 	motorB.set_position(10000);
-	while (! motorB.update() ){
-	Serial.print("2A: ");
-	Serial.print(motorA.Enc.read() );
-	Serial.print(" 2B: ");
-	Serial.println(motorB.Enc.read() );
-	}
-
+	smartSleep(5000);
 
 	motorA.set_position(0);
-	while (! motorA.update() ){
-	Serial.print("3A: ");
-	Serial.print(motorA.Enc.read() );
-	Serial.print(" 3B: ");
-	Serial.println(motorB.Enc.read() );
-	}
+	smartSleep(5000);
 
 	motorB.set_position(0);
-	while (! motorB.update() ){
-	Serial.print("4A: ");
-	Serial.print(motorA.Enc.read() );
-	Serial.print(" 4B: ");
-	Serial.println(motorB.Enc.read() );
-	}
-
-
-
+	smartSleep(5000);
 }
 
 void Avionics::smartSleep(unsigned long ms) {
-  sensors.smartDelay(ms);
+  unsigned long start = millis();
+  unsigned long lap = millis();
+  do {
+	  /* sensors.gpsUpdate(); */
+	  motorA.update();
+	  motorB.update();
+
+	  if( (millis() - lap) > 50){
+		  lap = millis();
+		  Serial.println("new 20Hz loop");
+		  /* record(); */
+		  /* cutdown(); */
+
+		  Serial.print("A: ");
+		  Serial.print(motorA.Enc.read() );
+		  Serial.print("B: ");
+		  Serial.println(motorB.Enc.read() );
+
+	  }
+  } while ( (millis() - start) < ms);
+
 }

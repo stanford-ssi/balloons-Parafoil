@@ -135,13 +135,12 @@ double Sensors::getGPSAlt(){
   return altitude;
 }
 
-void Sensors::smartDelay(unsigned long ms) {
-  unsigned long start = millis();
-  do
-  {
-    while (Serial3.available())
+void Sensors::gpsUpdate() {
+    // max of 10 updates so it doesn't hang the code
+    for(int i=0; i<10; i++){
+	if( !Serial3.available()) break;
       gps.encode(Serial3.read());
-  } while (millis() - start < ms);
+    }
 }
 
 String Sensors::readAllSensors(){
