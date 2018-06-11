@@ -57,43 +57,49 @@ void Avionics::fly(){
     /* Serial.println("break in fly"); */
 	
 
-
-	Serial.print("A: ");
-	Serial.print(motorA.Enc->read() );
-	Serial.print(" B: ");
-	Serial.println(motorB.Enc->read() );
+	EncA.write(100);
 	
 
-	motorA.set_position(10000);
-	while (! motorA.update() ){
+	while(true){
 	Serial.print("A: ");
 	Serial.print(motorA.Enc->read() );
 	Serial.print(" B: ");
 	Serial.println(motorB.Enc->read() );
 	}
+	
+
+	motorA.set_position(10000);
+	while (! motorA.update() ){
+	Serial.print("1A: ");
+	/* Serial.print(motorA.Enc->read() ); */
+	Serial.print(EncA.read() );
+	Serial.print(" 1B: ");
+	/* Serial.println(motorB.Enc->read() ); */
+	Serial.println(EncB.read() );
+	}
 
 	motorB.set_position(10000);
 	while (! motorB.update() ){
-	Serial.print("A: ");
+	Serial.print("2A: ");
 	Serial.print(motorA.Enc->read() );
-	Serial.print(" B: ");
+	Serial.print(" 2B: ");
 	Serial.println(motorB.Enc->read() );
 	}
 
 
 	motorA.set_position(0);
 	while (! motorA.update() ){
-	Serial.print("A: ");
+	Serial.print("3A: ");
 	Serial.print(motorA.Enc->read() );
-	Serial.print(" B: ");
+	Serial.print(" 3B: ");
 	Serial.println(motorB.Enc->read() );
 	}
 
 	motorB.set_position(0);
 	while (! motorB.update() ){
-	Serial.print("A: ");
+	Serial.print("4A: ");
 	Serial.print(motorA.Enc->read() );
-	Serial.print(" B: ");
+	Serial.print(" 4B: ");
 	Serial.println(motorB.Enc->read() );
 	}
 
