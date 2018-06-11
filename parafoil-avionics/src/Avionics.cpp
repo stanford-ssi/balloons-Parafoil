@@ -3,7 +3,7 @@
 bool trig;
 
 
-void Avionics::initialize(){
+Avionics::Avionics(): motorA(ENCODER_A_1,ENCODER_A_2), motorB(ENCODER_B_1,ENCODER_B_2) { 
 
   Serial.begin(9600);
   delay(5000);

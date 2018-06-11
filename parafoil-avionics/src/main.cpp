@@ -8,8 +8,7 @@
 
 int main(void){
 
-  Avionics avionics;
-  avionics.initialize();
+  Avionics avionics = Avionics();
 
   
 
