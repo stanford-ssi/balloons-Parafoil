@@ -17,7 +17,7 @@ void Motor::initialize(Encoder* Enc, int dir1_pin, int dir2_pin, int speed_pin){
   this->speed = 100;
   this->target = 0;
   this->dir = NEUTRAL;
-  /* this->Enc->write(0); */
+  this->Enc->write(0);
 }
 
 

@@ -2,10 +2,11 @@
 
 bool trig;
 
-Encoder EncA(ENCODER_A_1, ENCODER_A_2);
-Encoder EncB(ENCODER_B_1, ENCODER_B_2);
 
 void Avionics::initialize(){
+  Encoder *EncA = new Encoder(ENCODER_A_1, ENCODER_A_2);
+  Encoder *EncB = new Encoder(ENCODER_B_1, ENCODER_B_2);
+
 
 
   Serial.begin(9600);
@@ -13,8 +14,8 @@ void Avionics::initialize(){
   sensors.initializeSensors();
   sdcard.initializeSD(sensors);
 
-  motorA.initialize(&EncA, MOTOR_A_DIR_1, MOTOR_A_DIR_2, MOTOR_A_SPEED);
-  motorB.initialize(&EncB, MOTOR_B_DIR_1, MOTOR_B_DIR_2, MOTOR_B_SPEED);
+  motorA.initialize(EncA, MOTOR_A_DIR_1, MOTOR_A_DIR_2, MOTOR_A_SPEED);
+  motorB.initialize(EncB, MOTOR_B_DIR_1, MOTOR_B_DIR_2, MOTOR_B_SPEED);
 
 
   digitalWrite(LED_PIN,LOW);
@@ -57,25 +58,14 @@ void Avionics::fly(){
     /* Serial.println("break in fly"); */
 	
 
-	EncA.write(100);
-	
-
-	while(true){
-	Serial.print("A: ");
-	Serial.print(motorA.Enc->read() );
-	Serial.print(" B: ");
-	Serial.println(motorB.Enc->read() );
-	}
 	
 
 	motorA.set_position(10000);
 	while (! motorA.update() ){
 	Serial.print("1A: ");
-	/* Serial.print(motorA.Enc->read() ); */
-	Serial.print(EncA.read() );
+	Serial.print(motorA.Enc->read() );
 	Serial.print(" 1B: ");
-	/* Serial.println(motorB.Enc->read() ); */
-	Serial.println(EncB.read() );
+	Serial.println(motorB.Enc->read() );
 	}
 
 	motorB.set_position(10000);
