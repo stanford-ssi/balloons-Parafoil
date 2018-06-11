@@ -4,6 +4,13 @@ bool trig;
 
 
 void Avionics::initialize(){
+
+  if(inited){
+	  Serial.println("DONE FUCKED UP, Called initialize twice");
+	  while(1){}
+  }
+
+  inited = 1;
   Encoder *EncA = new Encoder(ENCODER_A_1, ENCODER_A_2);
   Encoder *EncB = new Encoder(ENCODER_B_1, ENCODER_B_2);
 

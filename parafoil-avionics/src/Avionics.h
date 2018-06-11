@@ -17,6 +17,7 @@ public:
 
 
 private:
+  int inited = 0;
 
   bool release = false;
   long applyheat = 0;
