@@ -24,11 +24,11 @@ bool Log::initializeSD(Sensors& sensors){
   }
 
   else{
-    dataFile = SD.open("datalog.txt", FILE_WRITE);
-    Serial.println("SD card intialized.");
-    dataFile.print("Time(ms), TempIn(C), Alt(m), Pressure(Pa), OrientationX(deg), y(deg) , z(deg), ");
-    dataFile.println("GPSLat, GPSLong, GPSSats, Speed(mps), Satellites");
-    dataFile.flush();
+    /* dataFile = SD.open("datalog.txt", FILE_WRITE); */
+    /* Serial.println("SD card intialized."); */
+    /* dataFile.print("Time(ms), TempIn(C), Alt(m), Pressure(Pa), OrientationX(deg), y(deg) , z(deg), "); */
+    /* dataFile.println("GPSLat, GPSLong, GPSSats, Speed(mps), Satellites"); */
+    /* dataFile.flush(); */
     /* dataFile.close(); */
   }
 
@@ -41,12 +41,13 @@ int pass = 0;
 void Log::writeSD(Sensors& sensors){
 
 	/* if(pass) return; */
-  /* dataFile = SD.open("datalog.txt", FILE_WRITE); */
+  File dataFilea = SD.open("datalog.txt", FILE_WRITE);
 
-  if (dataFile) {
-    dataFile.println(sensors.readAllSensors());
-    dataFile.flush();
-    /* dataFile.close(); */
+  if (dataFilea) {
+    /* dataFilea.println(sensors.readAllSensors()); */
+    dataFilea.println("Testing Strign!");
+    dataFilea.flush();
+    dataFilea.close();
   }
   else{
 	  Serial.println("SD CARD FAILURE");

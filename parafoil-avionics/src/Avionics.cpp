@@ -50,16 +50,16 @@ void Avionics::cutdown(){
 void Avionics::fly(){
 
 	motorA.set_position(10000);
-	smartSleep(5000);
+	smartSleep(3000);
 
 	motorB.set_position(10000);
-	smartSleep(5000);
+	smartSleep(3000);
 
 	motorA.set_position(0);
-	smartSleep(5000);
+	smartSleep(3000);
 
 	motorB.set_position(0);
-	smartSleep(5000);
+	smartSleep(3000);
 }
 
 void Avionics::smartSleep(unsigned long ms) {
