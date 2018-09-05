@@ -13,6 +13,16 @@ void Motor::initializeMotors(){
   setDirection(NEUTRAL);
 }
 
+// int A_target = 0;
+// int A_direction = 0;
+// void Motor::set_A_position(int pos){
+//   A_target = pos;
+//   if (pos - EncA.read() ){
+//
+//   }
+//
+// }
+
 void Motor::setDirection(Direction dir) { //tells method to go cw or ccw.  cw and ccw will never both be false
   switch (dir) {
     case CW:
@@ -20,7 +30,7 @@ void Motor::setDirection(Direction dir) { //tells method to go cw or ccw.  cw an
       digitalWrite(MOTOR_A_DIR_1, HIGH); //CHECK IF THIS SS THE CORRECT DIRECTION, OTHERWISE, CHANGE!
       digitalWrite(MOTOR_A_DIR_2, LOW);
 
-      digitalWrite(MOTOR_B_DIR_1, LOW);
+      digitalWrite(MOTOR_B_DIR_1, HIGH);
       digitalWrite(MOTOR_B_DIR_2, LOW);
       break;
     case NEUTRAL:
@@ -36,7 +46,7 @@ void Motor::setDirection(Direction dir) { //tells method to go cw or ccw.  cw an
       digitalWrite(MOTOR_A_DIR_1, LOW);
       digitalWrite(MOTOR_A_DIR_2, HIGH);
 
-      digitalWrite(MOTOR_B_DIR_1, LOW);
+      digitalWrite(MOTOR_B_DIR_1, HIGH);
       digitalWrite(MOTOR_B_DIR_2, LOW);
       break;
     default:
@@ -50,9 +60,12 @@ void Motor::setDirection(Direction dir) { //tells method to go cw or ccw.  cw an
   }
 }
 
-
+int loop_count = 0;
 void Motor::performScriptedFlight(Encoder& EncA, Encoder& EncB){
   Serial.println("break in scripted flight");
+  Serial.print("loop counter: ");
+  Serial.println(loop_count);
+  loop_count ++;
   //Print current positions
   long currentPosA = EncA.read();
   long currentPosB = EncB.read();
