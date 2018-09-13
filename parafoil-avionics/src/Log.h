@@ -14,12 +14,12 @@
 
 class Log{
 public:
-  /*************FUNCTIONS*********/
+  /***********************************FUNCTIONS********************************/
   bool initializeSD(Sensors& sensors);
   void writeSD(Sensors& sensors);
 
 private:
-  /*************OBJECTS***********/
+  /************************************OBJECTS*********************************/
   File dataFile;
 };
 

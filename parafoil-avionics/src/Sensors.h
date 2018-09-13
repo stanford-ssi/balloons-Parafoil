@@ -17,10 +17,9 @@
 
 class Sensors{
 public:
-  /***********CONSTRUCTOR*********/
-  //Sensors();
+  /********************************CONSTRUCTOR*********************************/
 
-  /*************FUNCTIONS*********/
+  /********************************FUNCTIONS***********************************/
   bool initializeSensors();
   void flashLED();
   String readAllSensors();
@@ -51,7 +50,7 @@ private:
  double ascentRate;              // Last calculated rate, to fill forward in logging
 
 
-  /*************OBJECTS***********/
+  /***********************************OBJECTS**********************************/
   Adafruit_BMP280 bmp;
   Adafruit_BNO055 bno;
   TinyGPSPlus gps;

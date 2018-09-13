@@ -8,16 +8,15 @@
 
 int main(void){
 
+/*************************************BOOT*************************************/
   Avionics avionics;
-  Encoder EncA(ENCODER_A_1, ENCODER_A_2);
-  Encoder EncB(ENCODER_B_1, ENCODER_B_2);
 
-  avionics.initialize(EncA, EncB);
+  avionics.initialize(); //Initialize all sensors, SD card, motors, etc.
 
+/*************************************MAIN*************************************/
   while(true){
     avionics.record();
     avionics.cutdown();
-    Serial.println("break before fly");
     avionics.fly(EncA, EncB);
     avionics.smartSleep(50);
   }

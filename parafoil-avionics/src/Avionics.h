@@ -9,7 +9,7 @@
 class Avionics {
 
 public:
-  void initialize(Encoder& EncA, Encoder& EncB);
+  void initialize();
   void record();
   void cutdown();
   void fly(Encoder& EncA, Encoder& EncB);
@@ -19,10 +19,15 @@ private:
 
   bool release = false;
   long applyheat = 0;
-  /********************OBJECTS*************************/
+  bool trig = false;
+
+  /******************************OBJECTS***************************************/
   Sensors sensors;
   Log sdcard;
   Motor motors;
+  Encoder EncA(ENCODER_A_1, ENCODER_A_2);
+  Encoder EncB(ENCODER_B_1, ENCODER_B_2);
+
 };
 
 #endif

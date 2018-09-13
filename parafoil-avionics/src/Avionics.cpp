@@ -1,8 +1,8 @@
 #include "Avionics.h"
 
-bool trig;
 
-void Avionics::initialize(Encoder& EncA, Encoder& EncB){
+
+void Avionics::initialize(){
   Serial.begin(9600);
   delay(5000);
   sensors.initializeSensors();
@@ -17,7 +17,6 @@ void Avionics::initialize(Encoder& EncA, Encoder& EncB){
   digitalWrite(WIRE,LOW);
   //receiver.initializeReceiver();
   trig = false;
-
 }
 
 void Avionics::record(){

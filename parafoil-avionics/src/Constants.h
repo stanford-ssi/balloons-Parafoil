@@ -25,6 +25,9 @@ const static int BAROMETER_MEASURMENT_INTERVAL = 10000;
 
 //LED
 const static uint8_t LED_PIN = 22;
+const static uint8_t GPS_LED = 4;
+const static uint8_t SD_LED = 5;
+const static uint8_t BNO_LED = 6;
 
 /*******************************SD CARD READER*********************************/
 const static uint8_t DIN_PIN = 12;

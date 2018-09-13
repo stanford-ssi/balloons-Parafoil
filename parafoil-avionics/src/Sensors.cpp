@@ -13,60 +13,57 @@
  *This function initializes the BMP280, BNO, and GPS.
  */
 bool Sensors::initializeSensors(){
-  bool success = true;
 
+  //Setting pins
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
   delay(5000);
 
-  if(!bmp.begin()){
+  if(!bmp.begin()){ //If unable to begin, flash light
     while(true){
       Serial.println("BMP280 could not be initialized.  Check wiring!");
       flashLED();
     }
-    success = false;
+    return false;
   }
 
-  if(!bno.begin()){
+  if(!bno.begin()){ //If unable to begin, flash light
     while(true){
       Serial.println("BNO could not be initialized.  Check wiring!");
       flashLED();
     }
-
-    success = false;
+    return false;
   }
+
   //bno.setExtCrystalaUse(true); /* Use external crystal for better accuracy */
 
   Serial3.begin(9600); //Begins serial communication with GPS
   delay(1000);
 
-  if(!Serial3.available()){
+  if(!Serial3.available()){ //If unable to begin, flash light
     while(true){
       Serial.println("GPS could not be initliazed. Check wiring!");
       flashLED();
     }
-    success = false;
+    return false;
   }
 
  lastAscentTime = 0;             // Time of last ascent rate calculation
  lastAlt = 0.0;                 // Last altitude, for calculation
  ascentRate = 0.0;              // Last calculated rate, to fill forward in logging
-  return success;
+ return true;
 }
 
 double Sensors::getTemp(){
-  double tempIn = bmp.readTemperature(); //create new variable each time method is called?
-  return tempIn;
+  return bmp.readTemperature();
 }
 
 double Sensors::getPressure(){
-  double pressure = bmp.readPressure();//create new variable each time method is called?
-  return pressure;
+  return bmp.readPressure();
 }
 
 double Sensors::getAlt(){
-  double alt = bmp.readAltitude(LAUNCH_SITE_PRESSURE);//create new variable each loop?
-  return alt;
+  return bmp.readAltitude(LAUNCH_SITE_PRESSURE);
 }
 
 double Sensors::getAscentRate(){
@@ -107,17 +104,14 @@ void Sensors::flashLED(){
     delay(500);
     digitalWrite(LED_PIN, LOW);
     delay(500);
-
 }
 
 double Sensors::getLat(){
-  double latitude = gps.location.lat();
-  return latitude;
+  return gps.location.lat();
 }
 
 double Sensors::getLon(){
-  double longitude = gps.location.lng();
-  return longitude;
+  return gps.location.lng();
 }
 
 uint8_t Sensors::getSats(){
@@ -137,15 +131,14 @@ double Sensors::getGPSAlt(){
 
 void Sensors::smartDelay(unsigned long ms) {
   unsigned long start = millis();
-  do
-  {
-    while (Serial3.available())
+  do{ //Continues to read Serial3 data for ms seconds
+    while (Serial3.available()){
       gps.encode(Serial3.read());
+    }
   } while (millis() - start < ms);
 }
 
 String Sensors::readAllSensors(){
-
   dataString = "";
   dataString += String(millis());
 //
@@ -162,7 +155,7 @@ String Sensors::readAllSensors(){
   dataString += " " + String(getSpeed());
   dataString += " " + String(getGPSAlt());
   dataString += " " + String(getSats());
-  
+
   Serial.println(dataString);
   return dataString;
 }
