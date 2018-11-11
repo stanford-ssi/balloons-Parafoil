@@ -12,8 +12,9 @@ public:
   void initialize();
   void record();
   void cutdown();
-  void fly(Encoder& EncA, Encoder& EncB);
+  void fly();
   void smartSleep(unsigned long ms);
+
 
 private:
 
