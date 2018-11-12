@@ -23,6 +23,7 @@ public:
   bool initializeSensors();
   void flashLED();
   String readAllSensors();
+  void smartDelay(unsigned long ms);
   String dataString;
 
   //BMP280

@@ -1,7 +1,9 @@
 #include "Motor.h"
 
+//CONSTRUCTOR
 Motor::Motor(int dir1_pin, int dir2_pin, int speed_pin, int enc1_pin, int enc2_pin):Enc(enc1_pin,enc2_pin){
 
+  //Initializing pins
   this->dir1_pin = dir1_pin;
   this->dir2_pin = dir2_pin;
   this->speed_pin = speed_pin;
@@ -18,16 +20,6 @@ Motor::Motor(int dir1_pin, int dir2_pin, int speed_pin, int enc1_pin, int enc2_p
   this->Enc.write(0);
 }
 
-// int A_target = 0;
-// int A_direction = 0;
-// void Motor::set_A_position(int pos){
-//   A_target = pos;
-//   if (pos - EncA.read() ){
-//
-//   }
-//
-// }
-
 void Motor::setDirection(Direction dir) { //tells method to go cw or ccw.  cw and ccw will never both be false
   switch (dir) {
     case CW:
@@ -35,14 +27,20 @@ void Motor::setDirection(Direction dir) { //tells method to go cw or ccw.  cw an
       digitalWrite(MOTOR_A_DIR_1, HIGH); //CHECK IF THIS SS THE CORRECT DIRECTION, OTHERWISE, CHANGE!
       digitalWrite(MOTOR_A_DIR_2, LOW);
 
+    case CCW:
+      Serial.println("Counter-Clockwise")
       digitalWrite(MOTOR_B_DIR_1, HIGH);
       digitalWrite(MOTOR_B_DIR_2, LOW);
       break;
+
     case NEUTRAL:
       Serial.println("Neutral");
       digitalWrite(MOTOR_A_DIR_1, LOW);
       digitalWrite(MOTOR_A_DIR_2, LOW);
 
+
+//READ POSITION OF motors
+//FIND HOW MANY STEPS TO TURN EACH MOTOR TO DESIRED POSITION
 void Motor::set_position(int pos){
 	this->target = pos;
 
@@ -59,6 +57,10 @@ void Motor::set_position(int pos){
       break;
   }
 }
+
+//ANOTHER method
+//TELLS MOTOR TO SPIN X NUMBER OF STEPS LEFT OR RIGHT (POSITIVE OR NEGATIVE)
+
 
 int loop_count = 0;
 void Motor::performScriptedFlight(Encoder& EncA, Encoder& EncB){
@@ -95,12 +97,7 @@ void Motor::performScriptedFlight(Encoder& EncA, Encoder& EncB){
       }
 
   }
-  // else if( loopTime < (1 * 60000))
-  //   setDirection(NEUTRAL);
-  // }
-  // else{
-  //
-  // }
+
 
 int Motor::update(){
 	if( this->dir != NEUTRAL){
