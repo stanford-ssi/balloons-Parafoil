@@ -42,7 +42,7 @@ public:
   double getSpeed();
   double getGPSAlt();
   uint8_t getSats();
-  void smartDelay(unsigned long ms);
+  void gpsUpdate();
 
 private:
  long lastAscentTime;             // Time of last ascent rate calculation
