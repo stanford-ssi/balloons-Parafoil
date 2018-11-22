@@ -5,13 +5,13 @@ void Avionics::initialize(){
 
   Serial.begin(9600); //Begin serial connection for serial port
   delay(5000); //Delay for serial monitor
-  
+
   sensors.initializeSensors(); //Initialize sensors
   sdcard.initializeSD(sensors); //Initialize SD Card
-  motors.initializeMotors(); //Initialize motors
-
-  EncA.write(NEUTRAL);
-  EncB.write(NEUTRAL);
+  // motors.initializeMotors(); //Initialize motors
+  //
+  // EncA.write(NEUTRAL);
+  // EncB.write(NEUTRAL);
 
   digitalWrite(LED_PIN,LOW); //Initialize LED
   pinMode(WIRE,OUTPUT); //Initialize nichrome wire cutdown
@@ -46,10 +46,10 @@ void Avionics::cutdown(){
   }
 }
 
-void Avionics::fly(Encoder& EncA, Encoder& EncB){
-    Serial.println("break in fly");
-   motors.performScriptedFlight(EncA,EncB);
-}
+// void Avionics::fly(Encoder& EncA, Encoder& EncB){
+//     Serial.println("break in fly");
+//    motors.performScriptedFlight(EncA,EncB);
+// }
 
 void Avionics::smartSleep(unsigned long ms) {
   sensors.smartDelay(ms);

@@ -41,6 +41,8 @@ const static int CUTDOWN_ALT = 300; //equivalent ot 500ft
 const static uint8_t WIRE = 14;
 const static uint8_t RELEASE_TIME = 3; //3 sec release time
 
+
+
 /*******************************MOTORS*****************************************/
 const static int SETPOINT_MARGIN_RADIUS = 3000;
 
