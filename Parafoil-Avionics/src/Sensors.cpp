@@ -41,10 +41,10 @@ bool Sensors::initializeSensors(){
   delay(1000);
 
   if(!Serial3.available()){ //If unable to begin, flash light
-    while(true){
-      Serial.println("GPS could not be initliazed. Check wiring!");
-      flashLED();
-    }
+    // while(true){
+    //   Serial.println("GPS could not be initliazed. Check wiring!");
+    //   flashLED();
+    // }
     return false;
   }
 
@@ -119,6 +119,7 @@ uint8_t Sensors::getSats(){
   return sats;
 }
 
+//Gets speed in meters/sec
 double Sensors::getSpeed(){
   double mps = gps.speed.mps();
   return mps;
@@ -141,10 +142,7 @@ void Sensors::smartDelay(unsigned long ms) {
 String Sensors::readAllSensors(){
   dataString = "";
   dataString += String(millis());
-//
-  bmp.begin(); //BEGIN EVERY LOOP
-//  bno.begin();
-  dataString += " " + String(bmp.readTemperature());
+  dataString += " " + String(getTemp());
   dataString += " " + String(getAlt());
   dataString += " " + String(getPressure());
   dataString += " " + String(getOrientationX());
@@ -155,6 +153,7 @@ String Sensors::readAllSensors(){
   dataString += " " + String(getSpeed());
   dataString += " " + String(getGPSAlt());
   dataString += " " + String(getSats());
+  dataString += " " + String(getSpeed());
 
   Serial.println(dataString);
   return dataString;
