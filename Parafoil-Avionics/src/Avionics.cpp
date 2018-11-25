@@ -18,6 +18,7 @@ void Avionics::initialize(){
   digitalWrite(WIRE,LOW);
 
   trig = false; //Wire has not been turned on yet
+
 }
 
 void Avionics::record(){

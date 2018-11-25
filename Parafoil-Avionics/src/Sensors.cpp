@@ -140,6 +140,7 @@ void Sensors::smartDelay(unsigned long ms) {
 }
 
 String Sensors::readAllSensors(){
+
   dataString = "";
   dataString += String(millis());
   dataString += " " + String(getTemp());
