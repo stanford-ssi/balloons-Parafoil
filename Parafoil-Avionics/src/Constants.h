@@ -32,7 +32,7 @@ const static uint8_t BNO_LED = 6;
 /*******************************SD CARD READER*********************************/
 const static uint8_t DIN_PIN = 12;
 const static uint8_t DOUT_PIN = 11;
-const static uint8_t SD_READER_CS = 20;
+const static uint8_t SD_READER_CS = 10;
 
 /************************************GPS***************************************/
 
@@ -62,8 +62,8 @@ const static int ENCODER_2_B = 15;
 
 
 
-const static int MIN_MOTOR = -10000;
-const static int MAX_MOTOR = 10000;
+const static int TURN_RADIUS = 5000;
+const static int MOTOR_SPEED = 150;
 const static int NEUTRAL = 0;
 
 /*******************************FLIGHT PATH************************************/

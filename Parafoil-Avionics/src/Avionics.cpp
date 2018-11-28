@@ -25,7 +25,7 @@ void Avionics::initialize(){
 
 
 void Avionics::record(){
-  //sensors.readAllSensors();
+  sensors.readAllSensors();
   sdcard.writeSD(sensors);
 }
 
@@ -60,7 +60,7 @@ void Avionics::forwardFlight(){
 
 void Avionics::bankLeft(){
 //  Serial.println("BANKINGLEFT");
-	motor1.set_position(5000);
+	motor1.set_position(TURN_RADIUS);
   motor1.update();
 	motor2.set_position(0);
   motor2.update();
@@ -69,7 +69,7 @@ void Avionics::bankLeft(){
 void Avionics::bankRight(){
   motor1.set_position(0);
   motor1.update();
-	motor2.set_position(5000);
+	motor2.set_position(TURN_RADIUS);
   motor2.update();
 }
 

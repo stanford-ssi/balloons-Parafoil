@@ -19,7 +19,7 @@ void Motor::initialize(Encoder* Enc, int dir1_pin, int dir2_pin, int speed_pin){
   pinMode(19,OUTPUT);
   pinMode(20,OUTPUT);
 
-  this->speed = 150;
+  this->speed = MOTOR_SPEED;
   this->target = 0;
   this->dir = NEUTRAL;
   this->Enc->write(0);
@@ -37,18 +37,18 @@ void Motor::set_position(int pos){
   else{
     enc = 2;
   }
-  Serial.println("ENCODER: " + String(enc));
-  Serial.print("WHERE I WANT TO GO: ");
-  Serial.println(pos);
+  // Serial.println("ENCODER: " + String(enc));
+  // Serial.print("WHERE I WANT TO GO: ");
+  // Serial.println(pos);
 
 	if( pos -  this->Enc->read() > 0 ){
 		this->dir = CW;
-    Serial.println("CW");
-    Serial.println(pos -  this->Enc->read());
-    Serial.println(this->dir1_pin);
-    Serial.println(this->dir2_pin);
-    Serial.println(this->speed_pin);
-    Serial.println(this->speed);
+    // Serial.println("CW");
+    // Serial.println(pos -  this->Enc->read());
+    // Serial.println(this->dir1_pin);
+    // Serial.println(this->dir2_pin);
+    // Serial.println(this->speed_pin);
+    // Serial.println(this->speed);
     pinMode(18,OUTPUT);
     pinMode(19,OUTPUT);
     pinMode(20,OUTPUT);
@@ -56,7 +56,7 @@ void Motor::set_position(int pos){
 		digitalWrite(this->dir2_pin, HIGH);
 	}else{
 		this->dir = CCW;
-    Serial.println("CCW");
+  //  Serial.println("CCW");
     Serial.println(pos -  this->Enc->read());
   //  Serial.println("HELLO");
 		digitalWrite(this->dir1_pin, HIGH);
@@ -73,7 +73,7 @@ int Motor::update(){
 
 			analogWrite(this->speed_pin, 0);
 			this->dir = NEUTRAL;
-      Serial.println("POSITION FOUND AND NOT MOVING");
+      //Serial.println("POSITION FOUND AND NOT MOVING");
     //  Serial.println("FOUND");
 			digitalWrite(this->dir1_pin, LOW);
 			digitalWrite(this->dir2_pin, LOW);
@@ -167,14 +167,14 @@ void Motor::forwardFlight(long loopTime, long currentPosA, long currentPosB){
     comparePositions(currentPosB, NEUTRAL);
 }
 
-void Motor::bankLeft(long currentPosA){
-    comparePositions(currentPosA, MAX_MOTOR);
-}
-
-void Motor::bankRight(long currentPosB){
-    comparePositions(currentPosB, MAX_MOTOR);
-}
-//CONSTRUCTOR
+// void Motor::bankLeft(long currentPosA){
+//     comparePositions(currentPosA, MAX_MOTOR);
+// }
+//
+// void Motor::bankRight(long currentPosB){
+//     comparePositions(currentPosB, MAX_MOTOR);
+// }
+// //CONSTRUCTOR
 // Motor::Motor(int dir1_pin, int dir2_pin, int speed_pin, int enc1_pin, int enc2_pin){
 //
 //   //Initializing pins

@@ -22,7 +22,7 @@ int main(void){
     // digitalWrite(20,LOW);
     // analogWrite(19,200);
 
-    //avionics.record();
+    avionics.record();
     // avionics.cutdown();
     avionics.fly();
     avionics.smartSleep(50);

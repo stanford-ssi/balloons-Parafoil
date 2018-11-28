@@ -19,6 +19,12 @@ bool Sensors::initializeSensors(){
   digitalWrite(LED_PIN, HIGH);
   delay(5000);
 
+  Wire.begin();
+  CORE_PIN18_CONFIG = 0;  // turn off primary pins before enable alternates
+  CORE_PIN19_CONFIG = 0;
+  CORE_PIN16_CONFIG = PORT_PCR_MUX(2)|PORT_PCR_ODE|PORT_PCR_SRE|PORT_PCR_DSE;
+  CORE_PIN17_CONFIG = PORT_PCR_MUX(2)|PORT_PCR_ODE|PORT_PCR_SRE|PORT_PCR_DSE;
+  Wire.setSDA(17); Wire.setSCL(16);
   if(!bmp.begin()){ //If unable to begin, flash light
     while(true){
       Serial.println("BMP280 could not be initialized.  Check wiring!");
@@ -37,10 +43,10 @@ bool Sensors::initializeSensors(){
 
   //bno.setExtCrystalaUse(true); /* Use external crystal for better accuracy */
 
-  Serial3.begin(9600); //Begins serial communication with GPS
+  Serial1.begin(9600); //Begins serial communication with GPS
   delay(1000);
 
-  if(!Serial3.available()){ //If unable to begin, flash light
+  if(!Serial1.available()){ //If unable to begin, flash light
     while(true){
       Serial.println("GPS could not be initliazed. Check wiring!");
       flashLED();
@@ -131,9 +137,9 @@ double Sensors::getGPSAlt(){
 
 void Sensors::smartDelay(unsigned long ms) {
   unsigned long start = millis();
-  do{ //Continues to read Serial3 data for ms seconds
-    while (Serial3.available()){
-      gps.encode(Serial3.read());
+  do{ //Continues to read Serial1 data for ms seconds
+    while (Serial1.available()){
+      gps.encode(Serial1.read());
     }
   } while (millis() - start < ms);
 }
