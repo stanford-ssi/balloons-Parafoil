@@ -34,8 +34,8 @@ private:
   Sensors sensors;
   Log sdcard;
 
-  Motor motorA;
-  Motor motorB;
+  Motor motor1;
+  Motor motor2;
 
 };
 

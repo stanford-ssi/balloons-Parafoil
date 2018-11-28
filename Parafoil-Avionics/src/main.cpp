@@ -7,6 +7,9 @@
 
 
 int main(void){
+  // pinMode(18,OUTPUT);
+  // pinMode(19,OUTPUT);
+  // pinMode(20,OUTPUT);
 
 /*************************************BOOT*************************************/
   Avionics avionics;
@@ -15,6 +18,10 @@ int main(void){
 
 /*************************************MAIN*************************************/
   while(true){
+    // digitalWrite(18,HIGH);
+    // digitalWrite(20,LOW);
+    // analogWrite(19,200);
+
     //avionics.record();
     // avionics.cutdown();
     avionics.fly();

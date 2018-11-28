@@ -15,22 +15,50 @@ void Motor::initialize(Encoder* Enc, int dir1_pin, int dir2_pin, int speed_pin){
   pinMode(dir2_pin, OUTPUT);
   pinMode(speed_pin, OUTPUT);
 
-  this->speed = 100;
+  pinMode(18,OUTPUT);
+  pinMode(19,OUTPUT);
+  pinMode(20,OUTPUT);
+
+  this->speed = 150;
   this->target = 0;
   this->dir = NEUTRAL;
   this->Enc->write(0);
 }
 
 
+//All this should do is determine where we want to go and what direction to spin
 void Motor::set_position(int pos){
 	this->target = pos;
 
-	if( pos -  this->Enc->read() > 0){
+  int enc = 0;
+  if( this->dir1_pin == 23 && this->dir2_pin == 21 ){
+    enc = 1;
+  }
+  else{
+    enc = 2;
+  }
+  Serial.println("ENCODER: " + String(enc));
+  Serial.print("WHERE I WANT TO GO: ");
+  Serial.println(pos);
+
+	if( pos -  this->Enc->read() > 0 ){
 		this->dir = CW;
+    Serial.println("CW");
+    Serial.println(pos -  this->Enc->read());
+    Serial.println(this->dir1_pin);
+    Serial.println(this->dir2_pin);
+    Serial.println(this->speed_pin);
+    Serial.println(this->speed);
+    pinMode(18,OUTPUT);
+    pinMode(19,OUTPUT);
+    pinMode(20,OUTPUT);
 		digitalWrite(this->dir1_pin, LOW);
 		digitalWrite(this->dir2_pin, HIGH);
 	}else{
 		this->dir = CCW;
+    Serial.println("CCW");
+    Serial.println(pos -  this->Enc->read());
+  //  Serial.println("HELLO");
 		digitalWrite(this->dir1_pin, HIGH);
 		digitalWrite(this->dir2_pin, LOW);
 	}
@@ -38,13 +66,15 @@ void Motor::set_position(int pos){
 }
 
 
-
 int Motor::update(){
+//  Serial.println(this->dir);
 	if( this->dir != NEUTRAL){
-		if( ( (this->dir ==  CW) && (this->Enc->read() > this->target)) ||
-		    ( (this->dir == CCW) && (this->Enc->read() < this->target)) ){
+		if( (abs(this->Enc->read()  - this->target) < 1000 ) ){
+
 			analogWrite(this->speed_pin, 0);
 			this->dir = NEUTRAL;
+      Serial.println("POSITION FOUND AND NOT MOVING");
+    //  Serial.println("FOUND");
 			digitalWrite(this->dir1_pin, LOW);
 			digitalWrite(this->dir2_pin, LOW);
 		}
@@ -52,41 +82,57 @@ int Motor::update(){
 	return this->dir == NEUTRAL;
 }
 
+// int Motor::update(){
+// //  Serial.println(this->dir);
+// 	if( this->dir != NEUTRAL){
+// 		if( ( (this->dir ==  CW) && (abs(this->Enc->read()  - this->target) > 0 )) ||
+// 		    ( (this->dir == CCW) && (abs(this->Enc->read()  - this->target) > 0 )) ){
+// 			analogWrite(this->speed_pin, 0);
+// 			this->dir = NEUTRAL;
+//       Serial.println("POSITION FOUND AND NOT MOVING");
+//     //  Serial.println("FOUND");
+// 			digitalWrite(this->dir1_pin, LOW);
+// 			digitalWrite(this->dir2_pin, LOW);
+// 		}
+// 	}
+// 	return this->dir == NEUTRAL;
+// }
+
 
 
 void Motor::setDirection(Direction dir) { //tells method to go cw or ccw.  cw and ccw will never both be false
   switch (dir) {
     case CW:
       Serial.println("Clockwise");
-      digitalWrite(MOTOR_A_DIR_1, HIGH); //CHECK IF THIS SS THE CORRECT DIRECTION, OTHERWISE, CHANGE!
-      digitalWrite(MOTOR_A_DIR_2, LOW);
+      digitalWrite(MOTOR_1_DIR_1, HIGH); //CHECK IF THIS SS THE CORRECT DIRECTION, OTHERWISE, CHANGE!
+      digitalWrite(MOTOR_1_DIR_2, LOW);
 
-      digitalWrite(MOTOR_B_DIR_1, LOW);
-      digitalWrite(MOTOR_B_DIR_2, LOW);
+      digitalWrite(MOTOR_2_DIR_1, LOW);
+      digitalWrite(MOTOR_2_DIR_2, LOW);
       break;
     case NEUTRAL:
       Serial.println("Neutral");
-      digitalWrite(MOTOR_A_DIR_1, LOW);
-      digitalWrite(MOTOR_A_DIR_2, LOW);
+      digitalWrite(MOTOR_1_DIR_1, LOW);
+      digitalWrite(MOTOR_1_DIR_2, LOW);
 
-      digitalWrite(MOTOR_B_DIR_1, LOW);
-      digitalWrite(MOTOR_B_DIR_2, LOW);
+      digitalWrite(MOTOR_2_DIR_1, LOW);
+      digitalWrite(MOTOR_2_DIR_2, LOW);
       break;
     case CCW:
       Serial.println("Counter-Clockwise");
-      digitalWrite(MOTOR_A_DIR_1, LOW);
-      digitalWrite(MOTOR_A_DIR_2, HIGH);
+      digitalWrite(MOTOR_1_DIR_1, LOW);
+      digitalWrite(MOTOR_1_DIR_2, HIGH);
 
-      digitalWrite(MOTOR_B_DIR_1, LOW);
-      digitalWrite(MOTOR_B_DIR_2, LOW);
+      digitalWrite(MOTOR_2_DIR_1, LOW);
+      digitalWrite(MOTOR_2_DIR_2, LOW);
       break;
     default:
       Serial.println("Illegal enum value");
-      digitalWrite(MOTOR_A_DIR_1, LOW);
-      digitalWrite(MOTOR_A_DIR_2, LOW);
+      digitalWrite(MOTOR_1_DIR_1, LOW);
+      digitalWrite(MOTOR_1_DIR_2, LOW);
 
-      digitalWrite(MOTOR_B_DIR_1, LOW);
-      digitalWrite(MOTOR_B_DIR_2, LOW);
+      digitalWrite(MOTOR_2_DIR_1, LOW);
+      digitalWrite(MOTOR_2_DIR_2, LOW);
       break;
   }
 }
@@ -96,8 +142,8 @@ void Motor::setDirection(Direction dir) { //tells method to go cw or ccw.  cw an
 
 //compares current position of either motor A and B and specifies direction
 int Motor::comparePositions(long currentPos, long setPoint) {
-  analogWrite(MOTOR_A_SPEED, 100);
-  analogWrite(MOTOR_B_SPEED, 100);
+  analogWrite(MOTOR_1_SPEED, 100);
+  analogWrite(MOTOR_2_SPEED, 100);
   int diff = setPoint - currentPos;
   Serial.print("Difference: ");
   Serial.println(diff);
@@ -191,17 +237,17 @@ void Motor::bankRight(long currentPosB){
 //
 //
 // int loop_count = 0;
-// void Motor::performScriptedFlight(Encoder& EncA, Encoder& EncB){
+// void Motor::performScriptedFlight(Encoder& Enc1, Encoder& Enc2){
 //   Serial.println("break in scripted flight");
 //   Serial.print("loop counter: ");
 //   Serial.println(loop_count);
 //   loop_count ++;
 //   //Print current positions
-//   long currentPosA = EncA.read();
-//   long currentPosB = EncB.read();
-//   Serial.print("EncA position: ");
+//   long currentPosA = Enc1.read();
+//   long currentPosB = Enc2.read();
+//   Serial.print("Enc1 position: ");
 //   Serial.println(currentPosA);
-//   Serial.print("EncB position: ");
+//   Serial.print("Enc2 position: ");
 //   Serial.println(currentPosB);
 //     long loopTime = millis();
 //   if( loopTime < 30000){

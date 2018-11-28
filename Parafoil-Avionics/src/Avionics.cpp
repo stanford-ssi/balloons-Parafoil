@@ -15,10 +15,12 @@ void Avionics::initialize(){
   // trig = false;
 
   //FLIGHT SHIT
-  Encoder *EncA = new Encoder(13,15);
-  Encoder *EncB = new Encoder(15, 12);
-  motorA.initialize(EncA, MOTOR_A_DIR_1, MOTOR_A_DIR_2, MOTOR_A_SPEED);
-  motorB.initialize(EncB, MOTOR_B_DIR_1, MOTOR_B_DIR_2, MOTOR_B_SPEED);
+  Encoder *Enc1 = new Encoder(ENCODER_1_A,ENCODER_1_B);
+  Encoder *Enc2 = new Encoder(ENCODER_2_A, ENCODER_2_B);
+  motor1.initialize(Enc1, MOTOR_1_DIR_1, MOTOR_1_DIR_2, MOTOR_1_SPEED);
+  motor2.initialize(Enc2, MOTOR_2_DIR_1, MOTOR_2_DIR_2, MOTOR_2_SPEED);
+
+
 }
 
 
@@ -50,60 +52,40 @@ void Avionics::cutdown(){
 }
 
 void Avionics::forwardFlight(){
-	motorA.set_position(0);
-	motorB.set_position(0);
+  motor1.set_position(0);
+	motor1.update();
+	motor2.set_position(0);
+  motor2.update();
 }
 
 void Avionics::bankLeft(){
-	motorA.set_position(10000);
-	motorB.set_position(0);
+//  Serial.println("BANKINGLEFT");
+	motor1.set_position(5000);
+  motor1.update();
+	motor2.set_position(0);
+  motor2.update();
 }
 
 void Avionics::bankRight(){
-	motorA.set_position(0);
-	motorB.set_position(10000);
+  motor1.set_position(0);
+  motor1.update();
+	motor2.set_position(5000);
+  motor2.update();
 }
 
 void Avionics::fly(){
-    /* Serial.println("break in fly"); */
 
 
-	motorA.set_position(10000);
-	while (! motorA.update() ){
-	Serial.print("1A: ");
-	Serial.print(motorA.Enc->read() );
-	Serial.print(" 1B: ");
-	Serial.println(motorB.Enc->read() );
-	}
+//  bankLeft();
+  //bankRight();
+  if( millis() < 4000) bankLeft();
+  else if( millis() > 4000 && millis() < 8000){
+    bankRight();
+  }
+  else if (millis() > 8000){
+    forwardFlight();
+  }
 
-	motorB.set_position(10000);
-	while (! motorB.update() ){
-	Serial.print("2A: ");
-	Serial.print(motorA.Enc->read() );
-	Serial.print(" 2B: ");
-	Serial.println(motorB.Enc->read() );
-	}
-
-
-	motorA.set_position(0);
-	while (! motorA.update() ){
-	Serial.print("3A: ");
-	Serial.print(motorA.Enc->read() );
-	Serial.print(" 3B: ");
-	Serial.println(motorB.Enc->read() );
-	}
-
-	motorB.set_position(0);
-	while (! motorB.update() ){
-	Serial.print("4A: ");
-	Serial.print(motorA.Enc->read() );
-	Serial.print(" 4B: ");
-	Serial.println(motorB.Enc->read() );
-	}
-
-
-
-   /* motors.performScriptedFlight(motorA.Enc,motorB.Enc); */
 }
 
 void Avionics::smartSleep(unsigned long ms) {
