@@ -15,9 +15,9 @@ int main(void){
 
 /*************************************MAIN*************************************/
   while(true){
-    avionics.record();
+    //avionics.record();
     // avionics.cutdown();
-    // avionics.fly(EncA, EncB);
+    avionics.fly();
     avionics.smartSleep(50);
   }
 

@@ -2,28 +2,31 @@
 
 
 void Avionics::initialize(){
+  //SENSOR SHIT
+  // Serial.begin(9600); //Begin serial connection for serial port
+  // delay(5000); //Delay for serial monitor
+  // sensors.initializeSensors(); //Initialize sensors
+  // sdcard.initializeSD(sensors); //Initialize SD Card
 
-  Serial.begin(9600); //Begin serial connection for serial port
-  delay(5000); //Delay for serial monitor
+  //CUTDOWN SHIT
+  // digitalWrite(LED_PIN,LOW); //Initialize LED
+  // pinMode(WIRE,OUTPUT); //Initialize nichrome wire cutdown
+  // digitalWrite(WIRE,LOW);
+  // trig = false;
 
-  sensors.initializeSensors(); //Initialize sensors
-  sdcard.initializeSD(sensors); //Initialize SD Card
-  // motors.initializeMotors(); //Initialize motors
-  //
-  // EncA.write(NEUTRAL);
-  // EncB.write(NEUTRAL);
-
-  digitalWrite(LED_PIN,LOW); //Initialize LED
-  pinMode(WIRE,OUTPUT); //Initialize nichrome wire cutdown
-  digitalWrite(WIRE,LOW);
-
-  trig = false; //Wire has not been turned on yet
+  //FLIGHT SHIT
+  Encoder *EncA = new Encoder(13,15);
+  Encoder *EncB = new Encoder(15, 12);
+  motorA.initialize(EncA, MOTOR_A_DIR_1, MOTOR_A_DIR_2, MOTOR_A_SPEED);
+  motorB.initialize(EncB, MOTOR_B_DIR_1, MOTOR_B_DIR_2, MOTOR_B_SPEED);
 }
+
 
 void Avionics::record(){
   //sensors.readAllSensors();
   sdcard.writeSD(sensors);
 }
+
 
 void Avionics::cutdown(){
 
@@ -46,10 +49,62 @@ void Avionics::cutdown(){
   }
 }
 
-// void Avionics::fly(Encoder& EncA, Encoder& EncB){
-//     Serial.println("break in fly");
-//    motors.performScriptedFlight(EncA,EncB);
-// }
+void Avionics::forwardFlight(){
+	motorA.set_position(0);
+	motorB.set_position(0);
+}
+
+void Avionics::bankLeft(){
+	motorA.set_position(10000);
+	motorB.set_position(0);
+}
+
+void Avionics::bankRight(){
+	motorA.set_position(0);
+	motorB.set_position(10000);
+}
+
+void Avionics::fly(){
+    /* Serial.println("break in fly"); */
+
+
+	motorA.set_position(10000);
+	while (! motorA.update() ){
+	Serial.print("1A: ");
+	Serial.print(motorA.Enc->read() );
+	Serial.print(" 1B: ");
+	Serial.println(motorB.Enc->read() );
+	}
+
+	motorB.set_position(10000);
+	while (! motorB.update() ){
+	Serial.print("2A: ");
+	Serial.print(motorA.Enc->read() );
+	Serial.print(" 2B: ");
+	Serial.println(motorB.Enc->read() );
+	}
+
+
+	motorA.set_position(0);
+	while (! motorA.update() ){
+	Serial.print("3A: ");
+	Serial.print(motorA.Enc->read() );
+	Serial.print(" 3B: ");
+	Serial.println(motorB.Enc->read() );
+	}
+
+	motorB.set_position(0);
+	while (! motorB.update() ){
+	Serial.print("4A: ");
+	Serial.print(motorA.Enc->read() );
+	Serial.print(" 4B: ");
+	Serial.println(motorB.Enc->read() );
+	}
+
+
+
+   /* motors.performScriptedFlight(motorA.Enc,motorB.Enc); */
+}
 
 void Avionics::smartSleep(unsigned long ms) {
   sensors.smartDelay(ms);
