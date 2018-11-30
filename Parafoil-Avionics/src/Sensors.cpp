@@ -15,28 +15,30 @@
 bool Sensors::initializeSensors(){
 
   //Setting pins
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, HIGH);
+//  pinMode(LED_PIN, OUTPUT);
+//  digitalWrite(LED_PIN, HIGH);
   delay(5000);
 
-  Wire.begin();
+
 
   Wire.setSDA(17); Wire.setSCL(16);
+  Wire.begin();
+  delay(500);
   if(!bmp.begin()){ //If unable to begin, flash light
     while(true){
       Serial.println("BMP280 could not be initialized.  Check wiring!");
-      flashLED();
+  //    flashLED();
     }
     return false;
   }
 
-  if(!bno.begin()){ //If unable to begin, flash light
-    while(true){
-      Serial.println("BNO could not be initialized.  Check wiring!");
-      flashLED();
-    }
-    return false;
-  }
+  // if(!bno.begin()){ //If unable to begin, flash light
+  //   while(true){
+  //     Serial.println("BNO could not be initialized.  Check wiring!");
+  //   //  flashLED();
+  //   }
+  //   return false;
+  // }
 
   //bno.setExtCrystalaUse(true); /* Use external crystal for better accuracy */
 
@@ -46,7 +48,7 @@ bool Sensors::initializeSensors(){
   if(!Serial1.available()){ //If unable to begin, flash light
     while(true){
       Serial.println("GPS could not be initliazed. Check wiring!");
-      flashLED();
+  //    flashLED();
     }
     return false;
   }

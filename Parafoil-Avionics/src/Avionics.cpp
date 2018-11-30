@@ -5,14 +5,14 @@ void Avionics::initialize(){
   //SENSOR SHIT
   Serial.begin(9600); //Begin serial connection for serial port
   delay(5000); //Delay for serial monitor
-  //sensors.initializeSensors(); //Initialize sensors
-  //sdcard.initializeSD(sensors); //Initialize SD Card
+  sensors.initializeSensors(); //Initialize sensors
+  sdcard.initializeSD(sensors); //Initialize SD Card
 
   //CUTDOWN SHIT
-  // digitalWrite(LED_PIN,LOW); //Initialize LED
-  // pinMode(WIRE,OUTPUT); //Initialize nichrome wire cutdown
-  // digitalWrite(WIRE,LOW);
-  // trig = false;
+//  digitalWrite(LED_PIN,LOW); //Initialize LED
+  pinMode(WIRE,OUTPUT); //Initialize nichrome wire cutdown
+  digitalWrite(WIRE,LOW);
+  trig = false;
 
   //FLIGHT SHIT
   Encoder *Enc1 = new Encoder(ENCODER_1_A,ENCODER_1_B);
