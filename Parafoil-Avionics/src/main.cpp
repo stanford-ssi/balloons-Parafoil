@@ -13,18 +13,18 @@ int main(void){
 
   avionics.setTrigState(true); //COMMENT OUT FOR ACTUAL LAUNCH
 
-  long start = 0;
+//  long start = 0;
 /*************************************MAIN*************************************/
   while(true){
-    Serial.println("hello");
+//    Serial.println("hello");
     avionics.record();
   //  avionics.cutdown();
     if (avionics.getTrigState()){
-      if(start == -1){
-        start = millis();
+      if(avionics.getStart() == -1){
+        avionics.setStart( millis() );
       }
       else{
-        avionics.fly(start);
+        avionics.fly(avionics.getStart());
       }
     }
     avionics.smartSleep(50);

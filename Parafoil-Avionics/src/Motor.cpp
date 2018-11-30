@@ -25,6 +25,9 @@ void Motor::initialize(Encoder* Enc, int dir1_pin, int dir2_pin, int speed_pin){
   this->Enc->write(0);
 }
 
+int Motor::getEncPosition(){
+  return this->Enc->read();
+}
 
 //All this should do is determine where we want to go and what direction to spin
 void Motor::set_position(int pos){
@@ -37,10 +40,10 @@ void Motor::set_position(int pos){
   else{
     enc = 2;
   }
-  if(enc == 2){
-    Serial.println(this->target);
-    Serial.println(this->Enc->read());
-  }
+  // if(enc == 2){
+  // //  Serial.println(this->target);
+  // //  Serial.println(this->Enc->read());
+  // }
   // Serial.println("ENCODER: " + String(enc));
   // Serial.print("WHERE I WANT TO GO: ");
   // Serial.println(pos);
@@ -48,9 +51,9 @@ void Motor::set_position(int pos){
 	if( pos -  this->Enc->read() > 0 ){
 		this->dir = CW;
     // Serial.println("CW");
-     Serial.println(pos);
-     Serial.println( this->Enc->read());
-
+//     Serial.println(pos);
+//     Serial.println( this->Enc->read());
+//
     pinMode(18,OUTPUT);
     pinMode(19,OUTPUT);
     pinMode(20,OUTPUT);

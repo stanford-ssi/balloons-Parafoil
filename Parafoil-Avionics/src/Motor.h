@@ -13,6 +13,8 @@ public:
   void set_position(int pos);
   int update();
 
+  int getEncPosition();
+
   void setDirection(Direction dir);
   void performScriptedFlight(Encoder& EncA, Encoder& EncB);
   int comparePositions(long currentPos, long setPoint) ;

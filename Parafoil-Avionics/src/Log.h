@@ -16,7 +16,7 @@ class Log{
 public:
   /***********************************FUNCTIONS********************************/
   bool initializeSD(Sensors& sensors);
-  void writeSD(Sensors& sensors);
+  void writeSD(Sensors& sensors, long start, long pos1, long pos2);
 
 private:
   /************************************OBJECTS*********************************/

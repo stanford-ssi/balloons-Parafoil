@@ -22,6 +22,12 @@ public:
   bool getTrigState();
   void setTrigState(bool state);
 
+  long getStart();
+  void setStart(long set);
+
+  long getPos1();
+  long getPos2();
+
 
   void smartSleep(unsigned long ms);
 
@@ -35,6 +41,7 @@ private:
   bool iffly = false;
 
   int state = -1;
+  long start = -1;
 
   /******************************OBJECTS***************************************/
   Sensors sensors;

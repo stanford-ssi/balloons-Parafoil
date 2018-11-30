@@ -161,7 +161,8 @@ String Sensors::readAllSensors(){
   dataString += " " + String(getGPSAlt());
   dataString += " " + String(getSats());
 
-//  dataString += " " + avionics
-  Serial.println(dataString);
+  // dataString += " " + String(avionics.motor1.getEncPosition());
+  // dataString += " " + String(avionics.motor2.getEncPosition());
+  Serial.print(dataString);
   return dataString;
 }

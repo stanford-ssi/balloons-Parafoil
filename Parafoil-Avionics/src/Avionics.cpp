@@ -27,7 +27,7 @@ void Avionics::initialize(){
 void Avionics::record(){
   sensors.readAllSensors();
 //  state = ( (millis() - start)/TIME_STEP ) % 4;
-  sdcard.writeSD(sensors);
+  sdcard.writeSD(sensors, getStart(), getPos1(), getPos2());
 }
 
 
@@ -77,23 +77,23 @@ void Avionics::bankRight(){
 void Avionics::fly(long start){
 
   state = ( (millis() - start)/TIME_STEP ) % 4;
-  Serial.println(state);
+//  Serial.println(state);
   if ( state == 0){
-    Serial.println("FLY FORWARD");
+//    Serial.println("FLY FORWARD");
     forwardFlight();
   }
   else if( state == 1){
-    Serial.println("BANK LEFT");
+  //  Serial.println("BANK LEFT");
     bankLeft();
   }
 
   else if( state == 2){
-    Serial.println("FLY FORWARD");
+//    Serial.println("FLY FORWARD");
     forwardFlight();
   }
 
   else if( state == 3){
-    Serial.println("BANK RIGHT");
+//    Serial.println("BANK RIGHT");
     bankRight();
   }
 }
@@ -110,6 +110,22 @@ void Avionics::setTrigState(bool state){
   trig =state;
 }
 
+long Avionics::getStart(){
+  return start;
+}
+
+void Avionics::setStart(long set){
+  start =set;
+}
+
+long Avionics::getPos1(){
+  return motor1.getEncPosition();
+
+}
+long Avionics::getPos2(){
+  return motor2.getEncPosition();
+
+}
 // bool Avionics::getFly(){
 //   return iffly;
 // }
