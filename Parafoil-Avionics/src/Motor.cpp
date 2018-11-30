@@ -37,6 +37,10 @@ void Motor::set_position(int pos){
   else{
     enc = 2;
   }
+  if(enc == 2){
+    Serial.println(this->target);
+    Serial.println(this->Enc->read());
+  }
   // Serial.println("ENCODER: " + String(enc));
   // Serial.print("WHERE I WANT TO GO: ");
   // Serial.println(pos);
@@ -44,11 +48,9 @@ void Motor::set_position(int pos){
 	if( pos -  this->Enc->read() > 0 ){
 		this->dir = CW;
     // Serial.println("CW");
-     Serial.println(pos -  this->Enc->read());
-    // Serial.println(this->dir1_pin);
-    // Serial.println(this->dir2_pin);
-    // Serial.println(this->speed_pin);
-    // Serial.println(this->speed);
+     Serial.println(pos);
+     Serial.println( this->Enc->read());
+
     pinMode(18,OUTPUT);
     pinMode(19,OUTPUT);
     pinMode(20,OUTPUT);

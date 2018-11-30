@@ -61,7 +61,7 @@ const static int ENCODER_2_A = 14;
 const static int ENCODER_2_B = 15;
 
 
-const static int TIME_STEP = 30000;
+const static int TIME_STEP = 10000;
 const static int TURN_RADIUS = 5000;
 const static int MOTOR_SPEED = 150;
 const static int NEUTRAL = 0;
