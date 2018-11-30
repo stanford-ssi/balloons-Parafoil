@@ -44,7 +44,7 @@ void Motor::set_position(int pos){
 	if( pos -  this->Enc->read() > 0 ){
 		this->dir = CW;
     // Serial.println("CW");
-    // Serial.println(pos -  this->Enc->read());
+     Serial.println(pos -  this->Enc->read());
     // Serial.println(this->dir1_pin);
     // Serial.println(this->dir2_pin);
     // Serial.println(this->speed_pin);
@@ -57,7 +57,7 @@ void Motor::set_position(int pos){
 	}else{
 		this->dir = CCW;
   //  Serial.println("CCW");
-    Serial.println(pos -  this->Enc->read());
+  //  Serial.println(pos -  this->Enc->read());
   //  Serial.println("HELLO");
 		digitalWrite(this->dir1_pin, HIGH);
 		digitalWrite(this->dir2_pin, LOW);

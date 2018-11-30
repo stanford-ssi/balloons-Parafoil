@@ -15,6 +15,8 @@ int main(void){
   Avionics avionics;
 
   avionics.initialize(); //Initialize all sensors, SD card, motors, etc.
+  avionics.setTrigState(true);
+  long start = 0;
 
 /*************************************MAIN*************************************/
   while(true){
@@ -22,9 +24,19 @@ int main(void){
     // digitalWrite(20,LOW);
     // analogWrite(19,200);
 
-    avionics.record();
-    // avionics.cutdown();
-    avionics.fly();
+   // avionics.record();
+    //avionics.cutdown();
+    if (avionics.getTrigState()){
+      if(start == -1){
+        start = millis();
+      }
+      else{
+        avionics.fly(start);
+      }
+
+      //Serial.println("HELLO");
+    }
+    //avionics.fly();
     avionics.smartSleep(50);
   }
 

@@ -3,10 +3,10 @@
 
 void Avionics::initialize(){
   //SENSOR SHIT
-  // Serial.begin(9600); //Begin serial connection for serial port
-  // delay(5000); //Delay for serial monitor
-  // sensors.initializeSensors(); //Initialize sensors
-  // sdcard.initializeSD(sensors); //Initialize SD Card
+  Serial.begin(9600); //Begin serial connection for serial port
+  delay(5000); //Delay for serial monitor
+  //sensors.initializeSensors(); //Initialize sensors
+  //sdcard.initializeSD(sensors); //Initialize SD Card
 
   //CUTDOWN SHIT
   // digitalWrite(LED_PIN,LOW); //Initialize LED
@@ -26,7 +26,7 @@ void Avionics::initialize(){
 
 void Avionics::record(){
   sensors.readAllSensors();
-  sdcard.writeSD(sensors);
+//  sdcard.writeSD(sensors);
 }
 
 
@@ -37,7 +37,7 @@ void Avionics::cutdown(){
     release = true; //Payload has been released
     applyheat = millis(); //Start time of hot wire
     Serial.println("START CUTDOWN");
-    digitalWrite(LED_PIN, HIGH);
+  //  digitalWrite(LED_PIN, HIGH);
     trig = true;
   }
 
@@ -45,7 +45,7 @@ void Avionics::cutdown(){
     if(millis() - applyheat > RELEASE_TIME * 1000){
       digitalWrite(WIRE,LOW); //Turn off nichrome wire
       Serial.println("END CUTDOWN");
-      digitalWrite(LED_PIN, LOW);
+    //  digitalWrite(LED_PIN, LOW);
       release = false;
     }
   }
@@ -73,21 +73,42 @@ void Avionics::bankRight(){
   motor2.update();
 }
 
-void Avionics::fly(){
-
-
-//  bankLeft();
-  //bankRight();
-  if( millis() < 4000) bankLeft();
-  else if( millis() > 4000 && millis() < 8000){
-    bankRight();
+void Avionics::fly(long start){
+  int state = -1;
+  state = ( (millis() - start)/TIME_STEP ) % 4;
+  Serial.println(state);
+  if ( state == 0){
+    Serial.println("FLY FORWARD");
+    forwardFlight();
   }
-  else if (millis() > 8000){
+  else if( state == 1){
+    Serial.println("BANK LEFT");
+    bankLeft();
+  }
+
+  else if( state == 2){
+    Serial.println("FLY FORWARD");
     forwardFlight();
   }
 
+  else if( state == 3){
+    Serial.println("BANK RIGHT");
+    bankRight();
+  }
 }
 
 void Avionics::smartSleep(unsigned long ms) {
   sensors.smartDelay(ms);
 }
+
+bool Avionics::getTrigState(){
+  return trig;
+}
+
+void Avionics::setTrigState(bool state){
+  trig =state;
+}
+
+// bool Avionics::getFly(){
+//   return iffly;
+// }

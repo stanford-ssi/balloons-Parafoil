@@ -20,10 +20,7 @@ bool Sensors::initializeSensors(){
   delay(5000);
 
   Wire.begin();
-  CORE_PIN18_CONFIG = 0;  // turn off primary pins before enable alternates
-  CORE_PIN19_CONFIG = 0;
-  CORE_PIN16_CONFIG = PORT_PCR_MUX(2)|PORT_PCR_ODE|PORT_PCR_SRE|PORT_PCR_DSE;
-  CORE_PIN17_CONFIG = PORT_PCR_MUX(2)|PORT_PCR_ODE|PORT_PCR_SRE|PORT_PCR_DSE;
+
   Wire.setSDA(17); Wire.setSCL(16);
   if(!bmp.begin()){ //If unable to begin, flash light
     while(true){
@@ -148,14 +145,14 @@ String Sensors::readAllSensors(){
   dataString = "";
   dataString += String(millis());
 //
-  bmp.begin(); //BEGIN EVERY LOOP
+//  bmp.begin(); //BEGIN EVERY LOOP
 //  bno.begin();
   dataString += " " + String(bmp.readTemperature());
   dataString += " " + String(getAlt());
   dataString += " " + String(getPressure());
-  dataString += " " + String(getOrientationX());
-  dataString += " " + String(getOrientationY());
-  dataString += " " + String(getOrientationZ());
+  //dataString += " " + String(getOrientationX());
+  //dataString += " " + String(getOrientationY());
+  //dataString += " " + String(getOrientationZ());
   dataString += " " + String(getLat(),6);
   dataString += " " + String(getLon(),6);
   dataString += " " + String(getSpeed());

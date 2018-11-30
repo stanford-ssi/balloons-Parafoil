@@ -14,10 +14,13 @@ public:
   void cutdown();
 
 
-  void fly();
+  void fly(long start);
   void forwardFlight();
   void bankLeft();
   void bankRight();
+
+  bool getTrigState();
+  void setTrigState(bool state);
 
 
   void smartSleep(unsigned long ms);
@@ -29,6 +32,7 @@ private:
   bool release = false;
   long applyheat = 0;
   bool trig = false;
+  bool iffly = false;
 
   /******************************OBJECTS***************************************/
   Sensors sensors;

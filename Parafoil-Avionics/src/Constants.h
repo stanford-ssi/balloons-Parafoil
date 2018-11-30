@@ -38,7 +38,7 @@ const static uint8_t SD_READER_CS = 10;
 
 /*********************************CUTDOWN**************************************/
 const static int CUTDOWN_ALT = 300; //equivalent ot 500ft
-const static uint8_t WIRE = 14;
+const static uint8_t WIRE = 9;
 const static uint8_t RELEASE_TIME = 3; //3 sec release time
 
 
@@ -61,7 +61,7 @@ const static int ENCODER_2_A = 14;
 const static int ENCODER_2_B = 15;
 
 
-
+const static int TIME_STEP = 30000;
 const static int TURN_RADIUS = 5000;
 const static int MOTOR_SPEED = 150;
 const static int NEUTRAL = 0;
