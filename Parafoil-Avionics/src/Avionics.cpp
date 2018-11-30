@@ -26,7 +26,8 @@ void Avionics::initialize(){
 
 void Avionics::record(){
   sensors.readAllSensors();
-//  sdcard.writeSD(sensors);
+//  state = ( (millis() - start)/TIME_STEP ) % 4;
+  sdcard.writeSD(sensors);
 }
 
 
@@ -74,7 +75,7 @@ void Avionics::bankRight(){
 }
 
 void Avionics::fly(long start){
-  int state = -1;
+
   state = ( (millis() - start)/TIME_STEP ) % 4;
   Serial.println(state);
   if ( state == 0){

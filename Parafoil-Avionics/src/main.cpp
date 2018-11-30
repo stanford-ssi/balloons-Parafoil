@@ -10,7 +10,9 @@ int main(void){
 /*************************************BOOT*************************************/
   Avionics avionics;
   avionics.initialize(); //Initialize all sensors, SD card, motors, etc.
-  avionics.setTrigState(true);
+
+  avionics.setTrigState(true); //COMMENT OUT FOR ACTUAL LAUNCH
+
   long start = 0;
 /*************************************MAIN*************************************/
   while(true){

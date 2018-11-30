@@ -34,6 +34,8 @@ private:
   bool trig = false;
   bool iffly = false;
 
+  int state = -1;
+
   /******************************OBJECTS***************************************/
   Sensors sensors;
   Log sdcard;
