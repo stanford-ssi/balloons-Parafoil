@@ -32,13 +32,13 @@ bool Sensors::initializeSensors(){
     return false;
   }
 
-  // if(!bno.begin()){ //If unable to begin, flash light
-  //   while(true){
-  //     Serial.println("BNO could not be initialized.  Check wiring!");
-  //   //  flashLED();
-  //   }
-  //   return false;
-  // }
+  if(!bno.begin()){ //If unable to begin, flash light
+    while(true){
+      Serial.println("BNO could not be initialized.  Check wiring!");
+    //  flashLED();
+    }
+    return false;
+  }
 
   //bno.setExtCrystalaUse(true); /* Use external crystal for better accuracy */
 
@@ -152,9 +152,9 @@ String Sensors::readAllSensors(){
   dataString += " " + String(bmp.readTemperature());
   dataString += " " + String(getAlt());
   dataString += " " + String(getPressure());
-  //dataString += " " + String(getOrientationX());
-  //dataString += " " + String(getOrientationY());
-  //dataString += " " + String(getOrientationZ());
+  dataString += " " + String(getOrientationX());
+  dataString += " " + String(getOrientationY());
+  dataString += " " + String(getOrientationZ());
   dataString += " " + String(getLat(),6);
   dataString += " " + String(getLon(),6);
   dataString += " " + String(getSpeed());
