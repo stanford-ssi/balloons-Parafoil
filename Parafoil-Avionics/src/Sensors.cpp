@@ -19,7 +19,8 @@ bool Sensors::initializeSensors(){
 //  digitalWrite(LED_PIN, HIGH);
   delay(5000);
 
-
+  pinMode(WIRE, OUTPUT);
+  digitalWrite(WIRE, LOW);
 
   Wire.setSDA(17); Wire.setSCL(16);
   Wire.begin();
@@ -44,7 +45,8 @@ bool Sensors::initializeSensors(){
 
   Serial1.begin(9600); //Begins serial communication with GPS
   delay(1000);
-
+  pinMode(WIRE, OUTPUT);
+  digitalWrite(WIRE, LOW);
   if(!Serial1.available()){ //If unable to begin, flash light
     while(true){
       Serial.println("GPS could not be initliazed. Check wiring!");
@@ -68,7 +70,12 @@ double Sensors::getPressure(){
 }
 
 double Sensors::getAlt(){
-  return bmp.readAltitude(LAUNCH_SITE_PRESSURE);
+  float calculatedAltitude;
+ if (getPressure() > 22632.1) calculatedAltitude = (44330.7 * (1 - pow(getPressure() / 101325.0, 0.190266)));
+ else calculatedAltitude =  -6341.73 * log((0.176481 * getPressure()) / 22632.1);
+ return calculatedAltitude;
+}
+//  return bmp.readAltitude(LAUNCH_SITE_PRESSURE);
 }
 
 double Sensors::getAscentRate(){

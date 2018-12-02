@@ -31,8 +31,6 @@ int Motor::getEncPosition(){
 
 //All this should do is determine where we want to go and what direction to spin
 void Motor::set_position(int pos){
-	this->target = pos;
-
   int enc = 0;
   if( this->dir1_pin == 23 && this->dir2_pin == 21 ){
     enc = 1;
@@ -40,6 +38,17 @@ void Motor::set_position(int pos){
   else{
     enc = 2;
   }
+  this->target= pos;
+
+  // if( enc == 2){
+  //   this->target = pos*6;
+  // }
+  // else{
+  //   this->target = pos;
+  // }
+
+
+
   // if(enc == 2){
   // //  Serial.println(this->target);
   // //  Serial.println(this->Enc->read());

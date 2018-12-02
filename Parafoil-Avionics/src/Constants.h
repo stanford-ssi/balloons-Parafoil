@@ -19,7 +19,7 @@
 
 
 //BMP
-const static float LAUNCH_SITE_PRESSURE = 100744.95;
+const static long LAUNCH_SITE_PRESSURE = 100768;
 const static int BAROMETER_MEASURMENT_INTERVAL = 10000;
 
 
@@ -37,9 +37,10 @@ const static uint8_t SD_READER_CS = 10;
 /************************************GPS***************************************/
 
 /*********************************CUTDOWN**************************************/
-const static int CUTDOWN_ALT = 300; //equivalent ot 500ft
+const static int CUTDOWN_ALT = 60; //equivalent ot 500ft
 const static uint8_t WIRE = 9;
 const static uint8_t RELEASE_TIME = 3; //3 sec release time
+const  long TIMER_DELAY = 120000;
 
 
 
@@ -62,7 +63,7 @@ const static int ENCODER_2_B = 15;
 
 
 const static int TIME_STEP = 10000;
-const static int TURN_RADIUS = 5000;
+const static int TURN_RADIUS = 20000;
 const static int MOTOR_SPEED = 150;
 const static int NEUTRAL = 0;
 

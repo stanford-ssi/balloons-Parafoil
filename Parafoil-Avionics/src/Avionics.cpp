@@ -3,6 +3,8 @@
 
 void Avionics::initialize(){
   //SENSOR SHIT
+  pinMode(WIRE, OUTPUT);
+  digitalWrite(WIRE, LOW);
   Serial.begin(9600); //Begin serial connection for serial port
   delay(5000); //Delay for serial monitor
   sensors.initializeSensors(); //Initialize sensors
@@ -33,21 +35,31 @@ void Avionics::record(){
 
 void Avionics::cutdown(){
 
-  if(!trig && ( sensors.getAlt() > CUTDOWN_ALT ) && (release == false) ){
-    digitalWrite(WIRE,HIGH); //Turn on nichrome wire
-    release = true; //Payload has been released
-    applyheat = millis(); //Start time of hot wire
-    Serial.println("START CUTDOWN");
-  //  digitalWrite(LED_PIN, HIGH);
-    trig = true;
+  if(!trig && ( sensors.getAlt() > CUTDOWN_ALT )) {
+    if(timer == -1){
+      timer = millis();
+    }
+  //  timer = millis();
+    if(millis() - timer > TIMER_DELAY && timer != -1){
+      digitalWrite(WIRE,HIGH);
+      applyheat = millis(); //Start time of hot wire
+      Serial.println("START CUTDOWN");
+    //  digitalWrite(LED_PIN, HIGH);
+      trig = true;
+    }
+  //  digitalWrite(WIRE,HIGH); //Turn on nichrome wire
+
+//    release = true; //Payload has been released
+
   }
 
-  if(release){
+  if(trig){
     if(millis() - applyheat > RELEASE_TIME * 1000){
       digitalWrite(WIRE,LOW); //Turn off nichrome wire
       Serial.println("END CUTDOWN");
     //  digitalWrite(LED_PIN, LOW);
-      release = false;
+
+    //  release = false;
     }
   }
 }
@@ -70,7 +82,7 @@ void Avionics::bankLeft(){
 void Avionics::bankRight(){
   motor1.set_position(0);
   motor1.update();
-	motor2.set_position(TURN_RADIUS);
+	motor2.set_position(TURN_RADIUS*4);
   motor2.update();
 }
 
@@ -93,7 +105,7 @@ void Avionics::fly(long start){
   }
 
   else if( state == 3){
-//    Serial.println("BANK RIGHT");
+//      Serial.println("BANK RIGHT");
     bankRight();
   }
 }

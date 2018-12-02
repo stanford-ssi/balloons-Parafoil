@@ -11,14 +11,16 @@ int main(void){
   Avionics avionics;
   avionics.initialize(); //Initialize all sensors, SD card, motors, etc.
 
-  avionics.setTrigState(true); //COMMENT OUT FOR ACTUAL LAUNCH
-
+//  avionics.setTrigState(true); //COMMENT OUT FOR ACTUAL LAUNCH
+  pinMode(WIRE, OUTPUT);
+  digitalWrite(WIRE, LOW);
 //  long start = 0;
 /*************************************MAIN*************************************/
   while(true){
+  //    digitalWrite(WIRE, LOW);
 //    Serial.println("hello");
     avionics.record();
-  //  avionics.cutdown();
+    avionics.cutdown();
     if (avionics.getTrigState()){
       if(avionics.getStart() == -1){
         avionics.setStart( millis() );

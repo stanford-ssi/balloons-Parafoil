@@ -43,6 +43,8 @@ private:
   int state = -1;
   long start = -1;
 
+  long timer = -1;
+
   /******************************OBJECTS***************************************/
   Sensors sensors;
   Log sdcard;
