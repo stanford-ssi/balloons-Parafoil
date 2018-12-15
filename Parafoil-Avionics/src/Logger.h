@@ -12,7 +12,7 @@
 #include <SD.h>
 #include "Sensors.h"
 
-class Log{
+class Logger{
 public:
   /***********************************FUNCTIONS********************************/
   bool initializeSD(Sensors& sensors);

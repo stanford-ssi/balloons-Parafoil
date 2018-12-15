@@ -1,6 +1,6 @@
 /*
   Stanford Student Space Initiative
-  Balloons | PARAFOIL | MARCH 2017
+  Balloons | BALLOONERANG | DECEMBER 2018
   File: Sensors.h
   --------------------------
   Interface to sensors on avionics hardware.
@@ -46,10 +46,9 @@ public:
   void gpsUpdate();
 
 private:
- long lastAscentTime;             // Time of last ascent rate calculation
- double lastAlt;                 // Last altitude, for calculation
- double ascentRate;              // Last calculated rate, to fill forward in logging
-
+ long lastAscentTime; // Time of last ascent rate calculation
+ double lastAlt; // Last altitude, for calculation
+ double ascentRate; // Last calculated rate, to fill forward in logging
 
   /***********************************OBJECTS**********************************/
   Adafruit_BMP280 bmp;

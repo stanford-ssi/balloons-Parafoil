@@ -36,13 +36,12 @@ const static uint8_t SD_READER_CS = 10;
 
 /************************************GPS***************************************/
 
+
 /*********************************CUTDOWN**************************************/
-const static int CUTDOWN_ALT = 60; //equivalent ot 500ft
-const static uint8_t WIRE = 9;
-const static uint8_t RELEASE_TIME = 3; //3 sec release time
+const static int CUTDOWN_ALT = 45;
+const static uint8_t NICHROME_WIRE = 9;
+const static uint8_t RELEASE_TIME = 10; //3 sec release time
 const  long TIMER_DELAY = 120000;
-
-
 
 /*******************************MOTORS*****************************************/
 const static int SETPOINT_MARGIN_RADIUS = 3000;
@@ -52,8 +51,6 @@ const static uint8_t MOTOR_1_DIR_2 = 21;
 const static uint8_t MOTOR_1_SPEED = 22;
 const static int ENCODER_1_A = 2;
 const static int ENCODER_1_B = 3;
-
-
 
 const static uint8_t MOTOR_2_DIR_1 = 20;
 const static uint8_t MOTOR_2_DIR_2 = 18;
@@ -68,7 +65,6 @@ const static int MOTOR_SPEED = 150;
 const static int NEUTRAL = 0;
 
 /*******************************FLIGHT PATH************************************/
-
 const static int BANK_LEFT_TIME = 30000;
 const static int BANK_RIGHT_TIME = 30000;
 const static int FORWARD_FLIGHT_TIME = 30000;

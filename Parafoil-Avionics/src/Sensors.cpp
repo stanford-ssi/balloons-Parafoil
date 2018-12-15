@@ -1,6 +1,6 @@
 /*
   Stanford Student Space Initiative
-  Balloons | PARAFOIL | MARCH 2017
+  Balloons | PARAFOIL | DECEMBER 2018
   File: Sensors.cpp
   --------------------------
   Implements "Sensors.h"
@@ -9,55 +9,46 @@
 #include "Sensors.h"
 
 /*
- *Function: initializeSensors()
+ *Function: initializeSensors
  *This function initializes the BMP280, BNO, and GPS.
  */
 bool Sensors::initializeSensors(){
-
-  //Setting pins
-//  pinMode(LED_PIN, OUTPUT);
-//  digitalWrite(LED_PIN, HIGH);
   delay(5000);
-
-  pinMode(WIRE, OUTPUT);
-  digitalWrite(WIRE, LOW);
-
-  Wire.setSDA(17); Wire.setSCL(16);
+  Wire.setSDA(17); //Alternate I2C pins
+  Wire.setSCL(16);
   Wire.begin();
+
+  //BMP INITIALIZATION
   delay(500);
   if(!bmp.begin()){ //If unable to begin, flash light
     while(true){
       Serial.println("BMP280 could not be initialized.  Check wiring!");
-  //    flashLED();
     }
     return false;
   }
 
+  //BNO INITIALIZATION
   if(!bno.begin()){ //If unable to begin, flash light
     while(true){
       Serial.println("BNO could not be initialized.  Check wiring!");
-    //  flashLED();
     }
     return false;
   }
-
   //bno.setExtCrystalaUse(true); /* Use external crystal for better accuracy */
 
-  Serial1.begin(9600); //Begins serial communication with GPS
+  //GPS INITIALIZATION
   delay(1000);
-  pinMode(WIRE, OUTPUT);
-  digitalWrite(WIRE, LOW);
+  Serial1.begin(9600); //Begins serial communication with GPS
   if(!Serial1.available()){ //If unable to begin, flash light
     while(true){
       Serial.println("GPS could not be initliazed. Check wiring!");
-  //    flashLED();
     }
     return false;
   }
 
- lastAscentTime = 0;             // Time of last ascent rate calculation
- lastAlt = 0.0;                 // Last altitude, for calculation
- ascentRate = 0.0;              // Last calculated rate, to fill forward in logging
+ lastAscentTime = 0;// Time of last ascent rate calculation
+ lastAlt = 0.0;// Last altitude, for calculation
+ ascentRate = 0.0;// Last calculated rate, to fill forward in logging
  return true;
 }
 
@@ -71,11 +62,13 @@ double Sensors::getPressure(){
 
 double Sensors::getAlt(){
   float calculatedAltitude;
- if (getPressure() > 22632.1) calculatedAltitude = (44330.7 * (1 - pow(getPressure() / 101325.0, 0.190266)));
- else calculatedAltitude =  -6341.73 * log((0.176481 * getPressure()) / 22632.1);
+  if (getPressure() > 22632.1){
+    calculatedAltitude = (44330.7 * (1 - pow(getPressure() / 101325.0, 0.190266)));
+  }
+  else{
+    calculatedAltitude =  -6341.73 * log((0.176481 * getPressure()) / 22632.1);
+  }
  return calculatedAltitude;
-}
-//  return bmp.readAltitude(LAUNCH_SITE_PRESSURE);
 }
 
 double Sensors::getAscentRate(){
@@ -153,9 +146,7 @@ void Sensors::smartDelay(unsigned long ms) {
 String Sensors::readAllSensors(){
   dataString = "";
   dataString += String(millis());
-//
-//  bmp.begin(); //BEGIN EVERY LOOP
-//  bno.begin();
+
   dataString += " " + String(bmp.readTemperature());
   dataString += " " + String(getAlt());
   dataString += " " + String(getPressure());

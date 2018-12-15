@@ -1,4 +1,10 @@
-
+/*
+  Stanford Student Space Initiative
+  Balloons | BALLOONERANG | DECEMBER 2018
+  File: Motors.h
+  --------------------------
+  Interface to DC motors and encoders
+*/
 #ifndef MOTOR_H
 #define MOTOR_H
 
@@ -32,9 +38,6 @@ private:
   int dir1_pin;
   int dir2_pin;
   int speed_pin;
-
-
-  int counter = 1;
 
 };
 

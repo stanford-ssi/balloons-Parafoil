@@ -1,8 +1,16 @@
+/*
+  Stanford Student Space Initiative
+  Balloons | BALLOONERANG | DECEMBER 2018
+  File: Avionics.h
+  --------------------------
+  Interface for physical actuators, SD card logging, and sensors
+*/
+
 #ifndef AVIONICS_H
 #define AVIONICS_H
 
 #include "Sensors.h"
-#include "Log.h"
+#include "Logger.h"
 #include "Motor.h"
 #include "Constants.h"
 
@@ -12,7 +20,6 @@ public:
   void initialize();
   void record();
   void cutdown();
-
 
   void fly(long start);
   void forwardFlight();
@@ -28,30 +35,21 @@ public:
   long getPos1();
   long getPos2();
 
-
   void smartSleep(unsigned long ms);
 
-
 private:
-
   /******************************CUTDOWN***************************************/
-  bool release = false;
-  long applyheat = 0;
-  bool trig = false;
-  bool iffly = false;
-
-  int state = -1;
-  long start = -1;
-
-  long timer = -1;
+  long applyheat = 0; //Apply heat until cutdown
+  bool trig = false; //Payload cutdown state
+  int state = -1; //Current flight maneuver
+  long start = -1; //Used to coordinate flight maneuvers
+  long timer = -1; //Timer for cutdown
 
   /******************************OBJECTS***************************************/
   Sensors sensors;
-  Log sdcard;
-
+  Logger log;
   Motor motor1;
   Motor motor2;
-
 };
 
 #endif

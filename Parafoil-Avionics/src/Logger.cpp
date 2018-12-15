@@ -5,11 +5,11 @@
   --------------------------
   Implements "Log.h"
 */
-#include "Log.h"
+#include "Logger.h"
 
 
 
-bool Log::initializeSD(Sensors& sensors){
+bool Logger::initializeSD(Sensors& sensors){
 
   //Setting pins
   pinMode(SD_READER_CS, OUTPUT);
@@ -40,7 +40,7 @@ bool Log::initializeSD(Sensors& sensors){
 
 int pass = 0;
 
-void Log::writeSD(Sensors& sensors, long start, long pos1, long pos2){
+void Logger::writeSD(Sensors& sensors, long start, long pos1, long pos2){
   dataFile = SD.open("datalog.txt", FILE_WRITE);
   int state = ( (millis() - start)/TIME_STEP ) % 4;
   dataFile.print(sensors.readAllSensors());
